@@ -41,7 +41,7 @@ public class UserControllerTest {
         //электронная почта не может быть пустой и должна содержать символ @;
         invalidEmail = new User("mailmail.ru", "dolore", "Nick Name", LocalDate.of(1992, 7, 7));
         //логин не может быть пустым и содержать пробелы;
-        invalidLogin = new User("mail@mail.ru", "", "Nick Name", LocalDate.of(1992, 7, 7));
+        invalidLogin = new User("mail@mail.ru", "gg hh ii uu", "Nick Name", LocalDate.of(1992, 7, 7));
         //дата рождения не может быть в будущем.
         invalidBirthday = new User("mail@mail.ru", "dolore", "Nick Name", LocalDate.of(2992, 7, 7));
     }
