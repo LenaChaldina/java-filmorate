@@ -11,11 +11,14 @@ import lombok.experimental.FieldDefaults;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class User {
     transient int id;
+    final Set<Integer> friends = new HashSet<>();
     @Email(message = "Невалидная почта")
     final String email;
     @NotBlank(message = "логин не может быть пустым")
@@ -30,6 +33,14 @@ public class User {
         this.login = login;
         this.name = name;
         this.birthday = birthday;
+    }
+
+    public void addFriend(int id) {
+        friends.add(id);
+    }
+
+    public void removeFriend(int id) {
+        friends.remove(id);
     }
 }
 

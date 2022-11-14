@@ -1,40 +1,68 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exceptions.InvalidUpdateException;
+import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 
-@Slf4j
 @Service
+@Slf4j
 public class FilmService {
-    private Map<Integer, Film> films = new HashMap<>();
-    private int id = 1;
+    private FilmStorage filmStorage;
+
+    @Autowired
+    public FilmService(FilmStorage filmStorage) {
+        this.filmStorage = filmStorage;
+    }
 
     public Film addFilm(Film film) {
-        film.setId(id++);
-        films.put(film.getId(), film);
-        log.info("Фильм успешно добавлен");
-        return film;
+        return filmStorage.addFilm(film);
     }
 
     public Film putFilm(Film film) {
-        if (films.containsKey(film.getId())) {
-            films.put(film.getId(), film);
-            log.info("Фильм успешно добавлен");
-        } else {
-            throw new InvalidUpdateException("Taкого фильма нет в списке");
-        }
-        return film;
+        return filmStorage.putFilm(film);
     }
 
     public List<Film> getFilms() {
-        return new ArrayList<>(films.values());
+        return filmStorage.getFilms();
     }
 
+    public void putLike(int id, int userId) {
+        if (filmStorage.findFilmById(id) == null) {
+            throw new EntityNotFoundException("Такого фильма " + id + " нет");
+        }
+        if (filmStorage.findFilmById(userId) == null) {
+            throw new EntityNotFoundException("Такого юзера " + userId + "нет");
+        } else {
+            filmStorage.findFilmById(id).addLike(userId);
+        }
+    }
+
+    public void deleteLike(int id, int userId) {
+        if (filmStorage.findFilmById(id) == null) {
+            throw new EntityNotFoundException("Такого фильма " + id + " нет");
+        }
+        if (filmStorage.findFilmById(userId) == null) {
+            throw new EntityNotFoundException("Такого юзера " + userId + "нет");
+        } else {
+            filmStorage.findFilmById(id).removeLike(userId);
+        }
+    }
+
+    public List<Film> getPopularFilms(int count) {
+        return new ArrayList<>(filmStorage.getFilms().stream().sorted(Comparator.comparingInt(Film::getCountLikes).reversed()).limit(count)
+                .collect(Collectors.toList()));
+    }
+
+    public Film findFilmById(int id) {
+        return filmStorage.findFilmById(id);
+    }
 }
+
