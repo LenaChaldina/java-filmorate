@@ -21,6 +21,7 @@ import java.time.LocalDate;
 @AutoConfigureMockMvc
 public class UserControllerTest {
     private UserController controller;
+    private String tmpJson;
     private MockMvc mockMvc;
     private Gson gson;
     private User user;
@@ -46,23 +47,29 @@ public class UserControllerTest {
         invalidBirthday = new User("mail@mail.ru", "dolore", "Nick Name", LocalDate.of(2992, 7, 7));
     }
 
+    public void mockMvcPerformSuccessful(String tmpJson) throws Exception {
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(tmpJson))
+                .andExpect(status().is2xxSuccessful());
+    }
+
+    public void mockMvcPerformError(String tmpJson) throws Exception {
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(tmpJson))
+                .andExpect(status().is4xxClientError());
+    }
+
     @Test
     public void userValidationTest() throws Exception {
-        mockMvc.perform(post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(gson.toJson(user)))
-                .andExpect(status().is2xxSuccessful());
-        mockMvc.perform(post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(gson.toJson(invalidEmail)))
-                .andExpect(status().is4xxClientError());
-        mockMvc.perform(post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(gson.toJson(invalidLogin)))
-                .andExpect(status().is4xxClientError());
-        mockMvc.perform(post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(gson.toJson(invalidBirthday)))
-                .andExpect(status().is4xxClientError());
+        tmpJson = gson.toJson(user);
+        mockMvcPerformSuccessful(tmpJson);
+        tmpJson = gson.toJson(invalidEmail);
+        mockMvcPerformError(tmpJson);
+        tmpJson = gson.toJson(invalidLogin);
+        mockMvcPerformError(tmpJson);
+        tmpJson = gson.toJson(invalidBirthday);
+        mockMvcPerformError(tmpJson);
     }
 }

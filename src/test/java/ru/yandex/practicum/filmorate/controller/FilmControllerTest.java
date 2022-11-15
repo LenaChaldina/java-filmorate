@@ -16,7 +16,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.сontroller.FilmController;
 import com.google.gson.Gson;
-import org.apache.commons.lang3.ArrayUtils;
 
 import java.time.LocalDate;
 
@@ -24,7 +23,8 @@ import java.time.LocalDate;
 @AutoConfigureMockMvc
 public class FilmControllerTest {
     private FilmController controller;
-    private MockMvc mockMvc;
+    private String tmpJson;
+    private final MockMvc mockMvc;
     private Gson gson;
     private Film film;
     private Film invalidName;
@@ -53,27 +53,31 @@ public class FilmControllerTest {
         invalidDuration = new Film("nisi eiusmod", "adipisicing", LocalDate.of(1992, 7, 7), -100L);
     }
 
+    public void mockMvcPerformSuccessful(String tmpJson) throws Exception {
+        mockMvc.perform(post("/films")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(tmpJson))
+                .andExpect(status().is2xxSuccessful());
+    }
+
+    public void mockMvcPerformError(String tmpJson) throws Exception {
+        mockMvc.perform(post("/films")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(tmpJson))
+                .andExpect(status().is4xxClientError());
+    }
+
     @Test
     public void filmValidationTest() throws Exception {
-        mockMvc.perform(post("/films")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(gson.toJson(film)))
-                .andExpect(status().is2xxSuccessful());
-        mockMvc.perform(post("/films")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(gson.toJson(invalidName)))
-                .andExpect(status().is4xxClientError());
-        mockMvc.perform(post("/films")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(gson.toJson(invalidSize)))
-                .andExpect(status().is4xxClientError());
-        mockMvc.perform(post("/films")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(gson.toJson(invalidRelease)))
-                .andExpect(status().is4xxClientError());
-        mockMvc.perform(post("/films")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(gson.toJson(invalidDuration)))
-                .andExpect(status().is4xxClientError());
+        tmpJson = gson.toJson(film);
+        mockMvcPerformSuccessful(tmpJson);
+        tmpJson = gson.toJson(invalidName);
+        mockMvcPerformError(tmpJson);
+        tmpJson = gson.toJson(invalidSize);
+        mockMvcPerformError(tmpJson);
+        tmpJson = gson.toJson(invalidRelease);
+        mockMvcPerformError(tmpJson);
+        tmpJson = gson.toJson(invalidDuration);
+        mockMvcPerformError(tmpJson);
     }
 }
