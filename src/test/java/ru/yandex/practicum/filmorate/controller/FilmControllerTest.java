@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.сontroller.FilmController;
 import com.google.gson.Gson;
 
@@ -42,16 +43,17 @@ public class FilmControllerTest {
     public void beforeEach() {
         gson = new GsonBuilder().registerTypeAdapter(LocalDate.class, new LocalDateAdapter()).create();
         //валидеый фильм
-        film = new Film("nisi eiusmod", "adipisicing", LocalDate.of(1992, 7, 7), 100L, mpa);
+        film = new Film("nisi eiusmod", "adipisicing", LocalDate.of(1992, 7, 7), 100L, new Mpa(1, null));
         //название не может быть пустым;
-        invalidName = new Film("", "adipisicing", LocalDate.of(1992, 7, 7), 100L, mpa);
+        invalidName = new Film("", "adipisicing", LocalDate.of(1992, 7, 7), 100L, new Mpa(1, null));
         //максимальная длина описания — 200 символов;
-        invalidSize = new Film("nisi eiusmod", desc, LocalDate.of(1992, 7, 7), 100L, mpa);
+        invalidSize = new Film("nisi eiusmod", desc, LocalDate.of(1992, 7, 7), 100L, new Mpa(1, null));
         //дата релиза — не раньше 28 декабря 1895 года;
-        invalidRelease = new Film("nisi eiusmod", "adipisicing", LocalDate.of(1792, 7, 7), 100L, mpa);
+        invalidRelease = new Film("nisi eiusmod", "adipisicing", LocalDate.of(1792, 7, 7), 100L, new Mpa(1, null));
         //продолжительность фильма должна быть положительной.
-        invalidDuration = new Film("nisi eiusmod", "adipisicing", LocalDate.of(1992, 7, 7), -100L, mpa);
+        invalidDuration = new Film("nisi eiusmod", "adipisicing", LocalDate.of(1992, 7, 7), -100L, new Mpa(1, null));
     }
+
 
     public void mockMvcPerformSuccessful(String tmpJson) throws Exception {
         mockMvc.perform(post("/films")
