@@ -7,22 +7,27 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dao.FriendStorage;
 import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.dao.UserStorage;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 public class UserService {
-    private UserStorage userStorage;
+    private final UserStorage userStorage;
+    private FriendStorage friendStorage;
+
     @Autowired
-    public UserService(UserStorage userStorage) {
+    public UserService(@Qualifier("UserDbStorage") UserStorage userStorage, @Qualifier("FriendDbStorage") FriendStorage friendStorage) {
         this.userStorage = userStorage;
+        this.friendStorage = friendStorage;
     }
+
     public User addUser(User user) {
         return userStorage.addUser(user);
     }
@@ -35,35 +40,30 @@ public class UserService {
         return userStorage.getUsers();
     }
 
-    public User findUserById(int id){
+    public User findUserById(int id) {
         return userStorage.findUserById(id);
     }
-    public void addFriend(int userId, int friendId){
+
+    public void addFriend(int userId, int friendId) {
+        friendStorage.addFriend(userId, friendId);
+    }
+
+    public void deleteFriend(int userId, int friendId) {
         if (userStorage.findUserById(userId) == null) {
             throw new EntityNotFoundException("Такого юзера " + userId + " нет");
         }
         if (userStorage.findUserById(friendId) == null) {
             throw new EntityNotFoundException("Такого друга " + friendId + "нет");
         } else {
-            userStorage.findUserById(userId).addFriend(friendId);
-            userStorage.findUserById(friendId).addFriend(userId);
+            friendStorage.deleteFriend(userId, friendId);
         }
     }
-    public void deleteFriend(int userId, int friendId){
-        if (userStorage.findUserById(userId) == null){
-            throw new EntityNotFoundException("Такого юзера "+ userId+" нет");
-        }
-        if (userStorage.findUserById(friendId) == null){
-            throw new EntityNotFoundException("Такого друга " + friendId + "нет");
-        } else {
-            userStorage.findUserById(userId).removeFriend(friendId);
-            userStorage.findUserById(friendId).removeFriend(userId);
-        }
-    }
+
     public List<User> getFriends(int id) {
-        return userStorage.findUserById(id).getFriends().stream().map(userStorage::findUserById).collect(Collectors.toList());
+        return friendStorage.getFriends(id);
     }
+
     public List<User> getCommonFriends(int userId, int otherId) {
-        return userStorage.findUserById(userId).getFriends().stream().filter(userStorage.findUserById(otherId).getFriends()::contains).map(userStorage::findUserById).collect(Collectors.toList());
+        return friendStorage.getCommonFriends(userId, otherId);
     }
 }

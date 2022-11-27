@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.dao;
 
 import ru.yandex.practicum.filmorate.model.Film;
 
@@ -12,4 +12,7 @@ public interface FilmStorage {
     public List<Film> getFilms();
 
     public Film findFilmById(int id);
+
+    List<Film> getPopularFilms(int count);
+    public void deleteFilm(int id);
 }

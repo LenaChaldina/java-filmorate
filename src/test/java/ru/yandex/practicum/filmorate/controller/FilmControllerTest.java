@@ -42,15 +42,15 @@ public class FilmControllerTest {
     public void beforeEach() {
         gson = new GsonBuilder().registerTypeAdapter(LocalDate.class, new LocalDateAdapter()).create();
         //валидеый фильм
-        film = new Film("nisi eiusmod", "adipisicing", LocalDate.of(1992, 7, 7), 100L);
+        film = new Film("nisi eiusmod", "adipisicing", LocalDate.of(1992, 7, 7), 100L, mpa);
         //название не может быть пустым;
-        invalidName = new Film("", "adipisicing", LocalDate.of(1992, 7, 7), 100L);
+        invalidName = new Film("", "adipisicing", LocalDate.of(1992, 7, 7), 100L, mpa);
         //максимальная длина описания — 200 символов;
-        invalidSize = new Film("nisi eiusmod", desc, LocalDate.of(1992, 7, 7), 100L);
+        invalidSize = new Film("nisi eiusmod", desc, LocalDate.of(1992, 7, 7), 100L, mpa);
         //дата релиза — не раньше 28 декабря 1895 года;
-        invalidRelease = new Film("nisi eiusmod", "adipisicing", LocalDate.of(1792, 7, 7), 100L);
+        invalidRelease = new Film("nisi eiusmod", "adipisicing", LocalDate.of(1792, 7, 7), 100L, mpa);
         //продолжительность фильма должна быть положительной.
-        invalidDuration = new Film("nisi eiusmod", "adipisicing", LocalDate.of(1992, 7, 7), -100L);
+        invalidDuration = new Film("nisi eiusmod", "adipisicing", LocalDate.of(1992, 7, 7), -100L, mpa);
     }
 
     public void mockMvcPerformSuccessful(String tmpJson) throws Exception {
