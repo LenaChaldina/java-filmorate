@@ -64,26 +64,6 @@ public class FilmStorageTest {
                 LocalDate.of(2000, 1, 1), 30L, gMpa);
     }
 
-   /* @Test
-    public void addFilm() {
-        Set<Genre> allGenres = new TreeSet<>(Comparator.comparing(Genre::getId));
-        allGenres.add(genreComedy);
-        allGenres.add(genreDrama);
-        film.setGenres(allGenres);
-        int id = filmStorage.addFilm(film).getId();
-        String sqlQuery = "SELECT * FROM films_model WHERE film_id = ?";
-        SqlRowSet filmRow = jdbcTemplate.queryForRowSet(sqlQuery, id);
-        filmRow.next();
-        Film newFilm = getFilmFromRow(filmRow);
-        assertEquals(film.getName(), newFilm.getName());
-        assertEquals(film.getDescription(), newFilm.getDescription());
-        assertEquals(film.getReleaseDate(), newFilm.getReleaseDate());
-        assertEquals(film.getDuration(), newFilm.getDuration());
-        assertEquals(film.getMpa(), newFilm.getMpa());
-        Set<Genre> newAllGenres = newFilm.getGenres();
-        assertEquals(allGenres, newAllGenres);
-    }*/
-
     @Test
     public void deleteFilm() {
         int id = filmStorage.addFilm(film).getId();
@@ -92,27 +72,6 @@ public class FilmStorageTest {
         SqlRowSet filmRow = jdbcTemplate.queryForRowSet(sqlQuery, id);
         assertFalse(filmRow.next());
     }
-
-    /*   @Test
-    public void updateFilm() {
-        Film newFilm = new Film("Новое название", "Новое описание",
-                LocalDate.of(2005, 12, 12), 60L, pgMpa);
-        Set<Genre> allGenres = new TreeSet<>(Comparator.comparing(Genre::getId));
-        allGenres.add(genreComedy);
-        newFilm.setGenres(allGenres);
-        int id = filmStorage.addFilm(film).getId();
-        newFilm.setId(id);
-        filmStorage.putFilm(newFilm);
-        String sqlQuery = "SELECT * FROM films_model WHERE film_id = ?";
-        SqlRowSet updatedFilmRow = jdbcTemplate.queryForRowSet(sqlQuery, id);
-        updatedFilmRow.next();
-        Film updatedFilm = getFilmFromRow(updatedFilmRow);
-        assertNotEquals(film.getName(), updatedFilm.getName());
-        assertNotEquals(film.getDescription(), updatedFilm.getDescription());
-        assertNotEquals(film.getReleaseDate(), updatedFilm.getReleaseDate());
-        assertNotEquals(film.getMpa(), updatedFilm.getMpa());
-        assertNotEquals(film.getGenres(), updatedFilm.getGenres());
-    }*/
 
     @Test
     public void getFilmById() {

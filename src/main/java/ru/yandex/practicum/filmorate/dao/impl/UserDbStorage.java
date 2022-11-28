@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
-@Service
 @Component("UserDbStorage")
 public class UserDbStorage implements UserStorage {
     private final JdbcTemplate jdbcTemplate;

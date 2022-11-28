@@ -15,13 +15,14 @@ import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
 
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Film {
-    transient int id;
+    int id;
     @NotBlank(message = "название не может быть пустым")
     final String name;
     //максимальная длина описания — 200 символов;
@@ -33,8 +34,7 @@ public class Film {
     @Positive(message = "продолжительность фильма должна быть положительной")
     final Long duration;
     final Mpa mpa;
-    Set<Genre> genres = new TreeSet<>(Comparator.comparingInt(Genre::getId));
-
+    Set<Genre> genres = new HashSet<>();
     public Film(String name, String description, LocalDate releaseDate, Long duration, Mpa mpa) {
         this.name = name;
         this.description = description;

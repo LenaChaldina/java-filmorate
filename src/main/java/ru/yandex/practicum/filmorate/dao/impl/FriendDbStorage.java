@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.FriendStorage;
 import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -13,7 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
-@Service
 @Component("FriendDbStorage")
 public class FriendDbStorage implements FriendStorage {
     private final JdbcTemplate jdbcTemplate;
