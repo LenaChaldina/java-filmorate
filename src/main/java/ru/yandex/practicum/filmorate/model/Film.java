@@ -14,8 +14,10 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.TreeSet;
 
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -31,24 +33,16 @@ public class Film {
     final LocalDate releaseDate;
     @Positive(message = "продолжительность фильма должна быть положительной")
     final Long duration;
-    final Set<Integer> likes = new HashSet<>();
-    int countLikes = 1;
-
-    public Film(String name, String description, LocalDate releaseDate, Long duration) {
+    final Mpa mpa;
+    Set<Genre> genres = new HashSet<>();
+    public Film(String name, String description, LocalDate releaseDate, Long duration, Mpa mpa) {
         this.name = name;
         this.description = description;
         this.releaseDate = releaseDate;
         this.duration = duration;
+        this.mpa = mpa;
     }
 
-    public void addLike(int userId) {
-        likes.add(userId);
-        countLikes++;
-    }
 
-    public void removeLike(int userId) {
-        likes.remove(userId);
-        countLikes--;
-    }
 
 }

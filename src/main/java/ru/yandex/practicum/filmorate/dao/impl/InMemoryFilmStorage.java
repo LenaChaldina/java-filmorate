@@ -1,15 +1,13 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.dao.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dao.FilmStorage;
 import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.InvalidUpdateException;
 import ru.yandex.practicum.filmorate.model.Film;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -45,5 +43,15 @@ public class InMemoryFilmStorage implements FilmStorage {
             throw new EntityNotFoundException("Такого фильма нет");
         }
     }
+    public List<Film> getPopularFilms(int count) {
+        return null;
+    }
 
+    @Override
+    public void deleteFilm(int id) {
+
+    }
+
+    public static class MpaDbStorage {
+    }
 }
