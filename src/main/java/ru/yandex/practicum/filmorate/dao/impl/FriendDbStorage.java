@@ -31,6 +31,8 @@ public class FriendDbStorage implements FriendStorage {
     }
 
     public void deleteFriend(int userId, int friendId) {
+        userExists(userId);
+        userExists(friendId);
         String sqlQuery = "DELETE FROM users_friends WHERE USER_ID = ? AND USER_FRIEND_ID = ?";
         jdbcTemplate.update(sqlQuery,
                 userId,
