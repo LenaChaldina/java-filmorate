@@ -13,8 +13,8 @@ import java.util.List;
 @Service
 @Slf4j
 public class FilmService {
-    private FilmStorage filmStorage;
-    private LikeStorage likeStorage;
+    private final FilmStorage filmStorage;
+    private final LikeStorage likeStorage;
 
     @Autowired
     public FilmService(@Qualifier("FilmDbStorage") FilmStorage filmStorage, @Qualifier("LikeDbStorage") LikeStorage likeStorage) {
@@ -52,6 +52,10 @@ public class FilmService {
 
     public void deleteFilm(int id) {
         filmStorage.deleteFilm(id);
+    }
+
+    public List<Film> getCommonFilms(Integer userId, Integer friendId) {
+        return filmStorage.getCommonFilms(userId, friendId);
     }
 }
 
