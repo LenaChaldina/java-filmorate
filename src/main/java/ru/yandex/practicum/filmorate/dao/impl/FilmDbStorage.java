@@ -30,7 +30,9 @@ public class FilmDbStorage implements FilmStorage {
                 film.getReleaseDate(),
                 film.getDuration(),
                 film.getMpa().getId());
-        film.getGenres();
+        //Set<Genre> genres = new TreeSet<>(Comparator.comparingInt(Genre::getId));
+        //genres.addAll(film.getGenres());
+       // film.setGenres(genres);
         film.setId(getFilmId(film));
         addFilmGenres(film);
         log.info("Фильм успешно добавлен");
@@ -39,9 +41,10 @@ public class FilmDbStorage implements FilmStorage {
 
     public void deleteFilm(int id) {
         if (getSqlRowSetByFilmId(id).next()) {
+            removeFilmGenres(id);
+            removeFilmLikes(id);
             String filmSqlQuery = "DELETE FROM films_model WHERE film_id = ?";
             jdbcTemplate.update(filmSqlQuery, id);
-            removeFilmGenres(id);
             log.info("Фильм с id " + id + " удален.");
         } else {
             throw new EntityNotFoundException("Фильм с id " + id + " не найден.");
@@ -116,6 +119,10 @@ public class FilmDbStorage implements FilmStorage {
         String sqlQuery = "DELETE FROM films_genres WHERE film_id = ?";
         jdbcTemplate.update(sqlQuery, id);
     }
+    private void removeFilmLikes(int id) {
+        String sqlQuery = "DELETE FROM FILMS_LIKES WHERE film_id = ?";
+        jdbcTemplate.update(sqlQuery, id);
+    }
 
     private SqlRowSet getSqlRowSetByFilmId(int id) {
         String sqlQuery = "SELECT * FROM films_model WHERE film_id = ?";
@@ -136,8 +143,8 @@ public class FilmDbStorage implements FilmStorage {
         }
     }
 
-    private Set<Genre> getFilmGenres(int id) {
-        Set<Genre> filmGenres = new TreeSet<>(Comparator.comparingInt(Genre::getId));
+    private SortedSet<Genre> getFilmGenres(int id) {
+        SortedSet<Genre> filmGenres = new TreeSet<>(Comparator.comparingInt(Genre::getId));
         String sqlQuery = "SELECT * FROM genre_dictionary WHERE genre_id IN " +
                 "(SELECT genre_id FROM FILMS_GENRES WHERE film_id = ?)";
         SqlRowSet genreRows = jdbcTemplate.queryForRowSet(sqlQuery, id);
