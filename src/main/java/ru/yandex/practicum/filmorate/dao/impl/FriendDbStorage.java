@@ -42,7 +42,8 @@ public class FriendDbStorage implements FriendStorage {
 
     public List<User> getFriends(int id) {
         SqlRowSet userRows = jdbcTemplate.queryForRowSet("select m.* from users_friends f inner join users_model m on f.user_friend_id = m.user_id where f.user_id = ?", id);
-        return getUsersFromDb(userRows);
+        List<User> usersFromDb = getUsersFromDb(userRows);
+        return usersFromDb;
 
     }
 

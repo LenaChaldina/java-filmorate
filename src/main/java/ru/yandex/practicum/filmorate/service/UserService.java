@@ -60,10 +60,15 @@ public class UserService {
     }
 
     public List<User> getFriends(int id) {
+        userStorage.findUserById(id);
         return friendStorage.getFriends(id);
     }
 
     public List<User> getCommonFriends(int userId, int otherId) {
         return friendStorage.getCommonFriends(userId, otherId);
+    }
+
+    public void deleteUser(int id) {
+        userStorage.deleteUser(id);
     }
 }
