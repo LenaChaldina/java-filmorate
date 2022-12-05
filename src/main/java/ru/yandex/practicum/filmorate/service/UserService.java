@@ -9,7 +9,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dao.FeedStorage;
 import ru.yandex.practicum.filmorate.dao.FriendStorage;
+import ru.yandex.practicum.filmorate.enums.EventTypeEnum;
+import ru.yandex.practicum.filmorate.enums.OperationTypeEnum;
 import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.dao.UserStorage;
@@ -21,11 +24,13 @@ import java.util.List;
 public class UserService {
     private final UserStorage userStorage;
     private FriendStorage friendStorage;
+    private final FeedStorage feedStorage;
 
     @Autowired
-    public UserService(@Qualifier("UserDbStorage") UserStorage userStorage, @Qualifier("FriendDbStorage") FriendStorage friendStorage) {
+    public UserService(@Qualifier("UserDbStorage") UserStorage userStorage, @Qualifier("FriendDbStorage") FriendStorage friendStorage, FeedStorage feedStorage) {
         this.userStorage = userStorage;
         this.friendStorage = friendStorage;
+        this.feedStorage = feedStorage;
     }
 
     public User addUser(User user) {
@@ -46,6 +51,7 @@ public class UserService {
 
     public void addFriend(int userId, int friendId) {
         friendStorage.addFriend(userId, friendId);
+        feedStorage.addFeedEvent(userId, friendId, EventTypeEnum.FRIEND, OperationTypeEnum.ADD);
     }
 
     public void deleteFriend(int userId, int friendId) {
@@ -55,6 +61,7 @@ public class UserService {
         if (userStorage.findUserById(friendId) == null) {
             throw new EntityNotFoundException("Такого друга " + friendId + "нет");
         } else {
+            feedStorage.addFeedEvent(userId, friendId, EventTypeEnum.FRIEND, OperationTypeEnum.REMOVE);
             friendStorage.deleteFriend(userId, friendId);
         }
     }

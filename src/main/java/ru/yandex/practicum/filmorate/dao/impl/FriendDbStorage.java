@@ -2,14 +2,18 @@ package ru.yandex.practicum.filmorate.dao.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dao.FriendStorage;
 import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
+import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Component("FriendDbStorage")
@@ -20,24 +24,33 @@ public class FriendDbStorage implements FriendStorage {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public void addFriend(int userId, int friendId) {
+    public int addFriend(int userId, int friendId) {
         userExists(userId);
         userExists(friendId);
-        String sqlQuery = "INSERT INTO users_friends(user_id, user_friend_id) VALUES (?, ?)";
-        jdbcTemplate.update(sqlQuery,
-                userId,
-                friendId);
+        String sqlQuery = "INSERT INTO USERS_FRIENDS (USER_ID, USER_FRIEND_ID) VALUES (?, ?)";
+
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(sqlQuery, new String[]{"FRIENDS_ID"});
+            ps.setInt(1, userId);
+            ps.setInt(2, friendId);
+            return ps;
+        }, keyHolder);
         log.info("Юзер успешно добавлен");
+
+        return Objects.requireNonNull(keyHolder.getKey()).intValue();
     }
 
-    public void deleteFriend(int userId, int friendId) {
+    public int deleteFriend(int userId, int friendId) {
         userExists(userId);
         userExists(friendId);
+        int rowId = jdbcTemplate.queryForObject("SELECT FRIENDS_ID FROM USERS_FRIENDS WHERE USER_ID = ? AND USER_FRIEND_ID = ?", Integer.class, userId, friendId);
         String sqlQuery = "DELETE FROM users_friends WHERE USER_ID = ? AND USER_FRIEND_ID = ?";
         jdbcTemplate.update(sqlQuery,
                 userId,
                 friendId);
         log.info("Юзер успешно удален");
+        return rowId;
     }
 
     public List<User> getFriends(int id) {

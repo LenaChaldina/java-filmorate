@@ -2,10 +2,14 @@ package ru.yandex.practicum.filmorate.dao.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dao.LikeStorage;
 import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
+
+import java.sql.PreparedStatement;
 
 @Slf4j
 @Component("LikeDbStorage")
@@ -23,10 +27,13 @@ public class LikeDbStorage implements LikeStorage {
         checkFilmId(filmId);
         checkUserId(userId);
         String sqlQuery = "INSERT INTO films_likes(film_id, user_id) VALUES (?, ?)";
-        jdbcTemplate.update(sqlQuery, filmId, userId);
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(sqlQuery);
+            ps.setInt(1, filmId);
+            ps.setInt(2, userId);
+            return ps;
+        });
         log.info("Пользователь с id " + userId + " поставил лайк фильму с id " + filmId + ".");
-
-
     }
 
     @Override

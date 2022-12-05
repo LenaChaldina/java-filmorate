@@ -4,8 +4,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dao.FeedStorage;
 import ru.yandex.practicum.filmorate.dao.FilmStorage;
 import ru.yandex.practicum.filmorate.dao.LikeStorage;
+import ru.yandex.practicum.filmorate.enums.EventTypeEnum;
+import ru.yandex.practicum.filmorate.enums.OperationTypeEnum;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.List;
@@ -15,11 +18,13 @@ import java.util.List;
 public class FilmService {
     private FilmStorage filmStorage;
     private LikeStorage likeStorage;
+    private final FeedStorage feedStorage;
 
     @Autowired
-    public FilmService(@Qualifier("FilmDbStorage") FilmStorage filmStorage, @Qualifier("LikeDbStorage") LikeStorage likeStorage) {
+    public FilmService(@Qualifier("FilmDbStorage") FilmStorage filmStorage, @Qualifier("LikeDbStorage") LikeStorage likeStorage, FeedStorage feedStorage) {
         this.filmStorage = filmStorage;
         this.likeStorage = likeStorage;
+        this.feedStorage = feedStorage;
     }
 
     public Film addFilm(Film film) {
@@ -36,9 +41,11 @@ public class FilmService {
 
     public void putLike(int id, int userId) {
         likeStorage.addLike(id, userId);
+        feedStorage.addFeedEvent(userId, id, EventTypeEnum.LIKE, OperationTypeEnum.ADD);
     }
 
     public void deleteLike(int id, int userId) {
+        feedStorage.addFeedEvent(userId, id, EventTypeEnum.LIKE, OperationTypeEnum.REMOVE);
         likeStorage.deleteLike(id, userId);
     }
 
