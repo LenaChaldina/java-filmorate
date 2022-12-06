@@ -14,6 +14,7 @@ import ru.yandex.practicum.filmorate.dao.FriendStorage;
 import ru.yandex.practicum.filmorate.enums.EventTypeEnum;
 import ru.yandex.practicum.filmorate.enums.OperationTypeEnum;
 import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.dao.UserStorage;
 
@@ -72,5 +73,9 @@ public class UserService {
 
     public List<User> getCommonFriends(int userId, int otherId) {
         return friendStorage.getCommonFriends(userId, otherId);
+    }
+
+    public List<Film> getFilmsRecommendations(int userId) {
+        return userStorage.getFilmsRecommendations(userId);
     }
 }

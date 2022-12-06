@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.UserStorage;
 import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.ArrayList;
@@ -52,6 +53,11 @@ public class InMemoryUserStorage implements UserStorage {
         } else {
             throw new EntityNotFoundException("Такого юзера нет");
         }
+    }
+
+    @Override
+    public List<Film> getFilmsRecommendations(int userId) {
+        return null;
     }
 
 }

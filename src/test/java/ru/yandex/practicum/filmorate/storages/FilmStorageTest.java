@@ -16,10 +16,7 @@ import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -85,7 +82,7 @@ public class FilmStorageTest {
         filmStorage.addFilm(film);
         filmStorage.addFilm(film);
         filmStorage.addFilm(film);
-        assertEquals(3, filmStorage.getFilms().size());
+        assertEquals(3, filmStorage.getListFilms().size());
     }
 
     @Test
@@ -129,8 +126,8 @@ public class FilmStorageTest {
         return new Mpa(mpaRow.getInt("mpa_id"), mpaRow.getString("rating"));
     }
 
-    private Set<Genre> getFilmGenres(int id) {
-        Set<Genre> filmGenres = new TreeSet<>(Comparator.comparingInt(Genre::getId));
+    private SortedSet<Genre> getFilmGenres(int id) {
+        SortedSet<Genre> filmGenres = new TreeSet<>(Comparator.comparingInt(Genre::getId));
         String sqlQuery = "SELECT * FROM genre_dictionary WHERE genre_id IN " +
                 "(SELECT genre_id FROM FILMS_GENRES WHERE film_id = ?)";
         SqlRowSet genreRows = jdbcTemplate.queryForRowSet(sqlQuery, id);
