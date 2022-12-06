@@ -45,7 +45,7 @@ public class LikeDbStorage implements LikeStorage {
         log.info("Пользователь с id " + userId + " убрал лайк с фильма с id " + filmId + ".");
     }
 
-    private void checkFilmId(int filmId) {
+    public void checkFilmId(int filmId) {
         String sqlQuery = "SELECT * FROM films_model WHERE film_id = ?";
         SqlRowSet filmRow = jdbcTemplate.queryForRowSet(sqlQuery, filmId);
         if (!filmRow.next()) {
@@ -53,7 +53,7 @@ public class LikeDbStorage implements LikeStorage {
         }
     }
 
-    private void checkUserId(int userId) {
+    public void checkUserId(int userId) {
         String sqlQuery = "SELECT * FROM users_model WHERE user_id = ?";
         SqlRowSet userRow = jdbcTemplate.queryForRowSet(sqlQuery, userId);
         if (!userRow.next()) {

@@ -45,6 +45,8 @@ public class FilmService {
     }
 
     public void deleteLike(int id, int userId) {
+        likeStorage.checkFilmId(id);
+        likeStorage.checkUserId(userId);
         feedStorage.addFeedEvent(userId, id, EventTypeEnum.LIKE, OperationTypeEnum.REMOVE);
         likeStorage.deleteLike(id, userId);
     }
