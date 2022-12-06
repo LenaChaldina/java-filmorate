@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.dao.impl;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
@@ -15,7 +14,6 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component("FilmDbStorage")
@@ -100,17 +98,6 @@ public class FilmDbStorage implements FilmStorage {
                 "GROUP BY fm.film_id ORDER BY COUNT(fl.like_id) DESC LIMIT ?", new FilmMapper(), count);
     }
 
-   /* private List<Film> getListFilms(SqlRowSet filmRows) {
-        List<Film> sqlFilms = new ArrayList<>();
-        while (filmRows.next()) {
-            Film dbFilm = new Film(filmRows.getString("title"),
-                    filmRows.getString("description"), filmRows.getDate("release_date").toLocalDate(), filmRows.getLong("duration"), getMpa(filmRows.getInt("mpa_id")));
-            dbFilm.setId(filmRows.getInt("film_id"));
-            dbFilm.setGenres(getFilmGenres(dbFilm.getId()));
-            sqlFilms.add(dbFilm);
-        }
-        return sqlFilms;
-    }*/
    public List<Film> getListFilms() {
        List<Film> films = new ArrayList<>();
        SqlRowSet filmRows = jdbcTemplate.queryForRowSet("SELECT film_id from films_model order by film_id");
@@ -193,5 +180,4 @@ public class FilmDbStorage implements FilmStorage {
             return null;
         }
     }
-
 }

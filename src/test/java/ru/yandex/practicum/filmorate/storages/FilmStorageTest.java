@@ -82,7 +82,7 @@ public class FilmStorageTest {
         filmStorage.addFilm(film);
         filmStorage.addFilm(film);
         filmStorage.addFilm(film);
-        assertEquals(3, filmStorage.getFilms().size());
+        assertEquals(3, filmStorage.getListFilms().size());
     }
 
     @Test

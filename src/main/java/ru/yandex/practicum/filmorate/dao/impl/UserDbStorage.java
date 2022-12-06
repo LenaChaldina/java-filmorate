@@ -17,7 +17,6 @@ import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component("UserDbStorage")
@@ -145,5 +144,4 @@ public class UserDbStorage implements UserStorage {
         SqlRowSet userRows = jdbcTemplate.queryForRowSet("select * from users_model where user_id = ? ", id);
         return userRows;
     }
-
 }
