@@ -30,8 +30,8 @@ public class Film {
     final LocalDate releaseDate;
     @Positive(message = "продолжительность фильма должна быть положительной")
     final Long duration;
-    Mpa mpa;
-    SortedSet<Genre> genres = new TreeSet<>(Comparator.comparingInt(Genre::getId));
+     Mpa mpa;
+    Set<Genre> genres = new HashSet<>();
     public Film(String name, String description, LocalDate releaseDate, Long duration, Mpa mpa) {
         this.name = name;
         this.description = description;

@@ -61,6 +61,7 @@ public class UserService {
     }
 
     public List<User> getFriends(int id) {
+        userStorage.findUserById(id);
         return friendStorage.getFriends(id);
     }
 
@@ -70,5 +71,9 @@ public class UserService {
 
     public List<Film> getFilmsRecommendations(int userId) {
         return userStorage.getFilmsRecommendations(userId);
+    }
+
+    public void deleteUser(int id) {
+        userStorage.deleteUser(id);
     }
 }

@@ -42,9 +42,10 @@ public class FilmDbStorage implements FilmStorage {
 
     public void deleteFilm(int id) {
         if (getSqlRowSetByFilmId(id).next()) {
+            removeFilmGenres(id);
+            removeFilmLikes(id);
             String filmSqlQuery = "DELETE FROM films_model WHERE film_id = ?";
             jdbcTemplate.update(filmSqlQuery, id);
-            removeFilmGenres(id);
             log.info("Фильм с id " + id + " удален.");
         } else {
             throw new EntityNotFoundException("Фильм с id " + id + " не найден.");
@@ -75,18 +76,18 @@ public class FilmDbStorage implements FilmStorage {
                 , new FilmMapper(), id);
         Mpa mpa = jdbcTemplate.queryForObject("select mpa_dictionary.mpa_id, mpa_dictionary.rating from mpa_dictionary where mpa_id =?", new MpaMapper(), film.getMpa().getId());
         film.setMpa(mpa);
-            List<Genre> genres = jdbcTemplate.query("SELECT G2.* FROM films_genres G1 inner JOIN genre_dictionary G2 on G2.genre_id = g1.genre_id WHERE g1.film_id=?;"
-                    , new GenreMapper(), id);
-            SortedSet<Genre> genresSet = new TreeSet<>(Comparator.comparingInt(Genre::getId));
-            genresSet.addAll(genres);
-            film.setGenres(genresSet);
+        List<Genre> genres = jdbcTemplate.query("SELECT G2.* FROM films_genres G1 inner JOIN genre_dictionary G2 on G2.genre_id = g1.genre_id WHERE g1.film_id=?;"
+                , new GenreMapper(), id);
+        SortedSet<Genre> genresSet = new TreeSet<>(Comparator.comparingInt(Genre::getId));
+        genresSet.addAll(genres);
+        film.setGenres(genresSet);
         return film;
     }
 
     private void checkFilmIdExists(int id) {
         SqlRowSet filmRows = jdbcTemplate.queryForRowSet("select * from films_model where film_id = ? ", id);
-            if (!filmRows.next()) {
-                throw new EntityNotFoundException("Фильм с id " + id + " не найден.");
+        if (!filmRows.next()) {
+            throw new EntityNotFoundException("Фильм с id " + id + " не найден.");
         }
     }
 
@@ -98,14 +99,14 @@ public class FilmDbStorage implements FilmStorage {
                 "GROUP BY fm.film_id ORDER BY COUNT(fl.like_id) DESC LIMIT ?", new FilmMapper(), count);
     }
 
-   public List<Film> getListFilms() {
-       List<Film> films = new ArrayList<>();
-       SqlRowSet filmRows = jdbcTemplate.queryForRowSet("SELECT film_id from films_model order by film_id");
-       while (filmRows.next()) {
-           films.add(findFilmById(filmRows.getInt("film_id")));
-       }
-       return films;
-   }
+    public List<Film> getListFilms() {
+        List<Film> films = new ArrayList<>();
+        SqlRowSet filmRows = jdbcTemplate.queryForRowSet("SELECT film_id from films_model order by film_id");
+        while (filmRows.next()) {
+            films.add(findFilmById(filmRows.getInt("film_id")));
+        }
+        return films;
+    }
 
     private SqlRowSet getFilmsSqlRowSet(int id) {
         SqlRowSet filmRows = jdbcTemplate.queryForRowSet("select * from films_model where film_id = ? ", id);
@@ -138,6 +139,8 @@ public class FilmDbStorage implements FilmStorage {
 
     private SortedSet<Genre> getFilmGenres(int id) {
         SortedSet<Genre> filmGenres = new TreeSet<>(Comparator.comparingInt(Genre::getId));
+
+
         String sqlQuery = "SELECT * FROM genre_dictionary WHERE genre_id IN " +
                 "(SELECT genre_id FROM FILMS_GENRES WHERE film_id = ?)";
         SqlRowSet genreRows = jdbcTemplate.queryForRowSet(sqlQuery, id);
@@ -145,6 +148,11 @@ public class FilmDbStorage implements FilmStorage {
             filmGenres.add(getGenreFromRow(genreRows));
         }
         return filmGenres;
+    }
+
+    private void removeFilmLikes(int id) {
+        String sqlQuery = "DELETE FROM FILMS_LIKES WHERE film_id = ?";
+        jdbcTemplate.update(sqlQuery, id);
     }
 
     private void checkGenreIdExistence(Film film) {

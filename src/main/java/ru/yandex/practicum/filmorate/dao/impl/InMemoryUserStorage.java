@@ -60,4 +60,9 @@ public class InMemoryUserStorage implements UserStorage {
         return null;
     }
 
+    @Override
+    public void deleteUser(int id) {
+
+    }
+
 }
