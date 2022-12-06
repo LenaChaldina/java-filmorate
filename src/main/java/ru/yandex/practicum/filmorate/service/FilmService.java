@@ -31,7 +31,7 @@ public class FilmService {
     }
 
     public List<Film> getFilms() {
-        return filmStorage.getFilms();
+        return filmStorage.getListFilms();
     }
 
     public void putLike(int id, int userId) {

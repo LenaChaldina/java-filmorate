@@ -9,7 +9,7 @@ public interface FilmStorage {
 
     Film putFilm(Film film);
 
-    List<Film> getFilms();
+    List<Film> getListFilms();
 
     Film findFilmById(int id);
 
