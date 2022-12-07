@@ -11,14 +11,15 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.FeedStorage;
 import ru.yandex.practicum.filmorate.dao.FriendStorage;
-import ru.yandex.practicum.filmorate.enums.EventTypeEnum;
-import ru.yandex.practicum.filmorate.enums.OperationTypeEnum;
+import ru.yandex.practicum.filmorate.enums.EventType;
+import ru.yandex.practicum.filmorate.enums.OperationType;
 import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.dao.UserStorage;
 
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -99,7 +100,7 @@ public class UserService {
             log.info("Пользователи {} и {} подружились", userStorage.findUserById(friendId).getName()
                     , userStorage.findUserById(userId).getName());
             friendStorage.addFriend(userId, friendId);
-            feedStorage.addFeedEvent(userId, friendId, EventTypeEnum.FRIEND, OperationTypeEnum.ADD);
+            feedStorage.addFeedEvent(Map.of("userId", userId, "entityId", friendId), EventType.FRIEND, OperationType.ADD);
         }
     }
 
@@ -110,7 +111,7 @@ public class UserService {
         if (userStorage.findUserById(friendId) == null) {
             throw new EntityNotFoundException("Такого друга " + friendId + "нет");
         } else {
-            feedStorage.addFeedEvent(userId, friendId, EventTypeEnum.FRIEND, OperationTypeEnum.REMOVE);
+            feedStorage.addFeedEvent(Map.of("userId", userId, "entityId", friendId), EventType.FRIEND, OperationType.REMOVE);
             friendStorage.deleteFriend(userId, friendId);
         }
     }

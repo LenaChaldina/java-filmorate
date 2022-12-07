@@ -4,14 +4,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dao.FeedStorage;
 import ru.yandex.practicum.filmorate.dao.ReviewStorage;
 import ru.yandex.practicum.filmorate.dao.impl.FilmDbStorage;
 import ru.yandex.practicum.filmorate.dao.impl.ReviewDbStorage;
+import ru.yandex.practicum.filmorate.enums.EventType;
+import ru.yandex.practicum.filmorate.enums.OperationType;
 import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.RequestErrorForReview;
 import ru.yandex.practicum.filmorate.model.Review;
 
 import java.util.Collection;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -19,15 +23,17 @@ public class ReviewService implements ReviewStorage {
 
     private int id = 1;
 
-    final ReviewDbStorage reviewDbStorage;
-    final FilmDbStorage filmDbStorage;
-    final UserService userService;
+    private final ReviewDbStorage reviewDbStorage;
+    private final FilmDbStorage filmDbStorage;
+    private final UserService userService;
+    private final FeedStorage feedStorage;
 
     public ReviewService(@Qualifier("reviewDbStorage") ReviewDbStorage reviewDbStorage
-            , UserService userService, @Qualifier("FilmDbStorage") FilmDbStorage filmDbStorage) {
+            , UserService userService, @Qualifier("FilmDbStorage") FilmDbStorage filmDbStorage, FeedStorage feedStorage) {
         this.reviewDbStorage = reviewDbStorage;
         this.userService = userService;
         this.filmDbStorage = filmDbStorage;
+        this.feedStorage = feedStorage;
     }
 
     @Override
@@ -51,7 +57,9 @@ public class ReviewService implements ReviewStorage {
             id++;
         }
         log.info("Отзыв с id = {} успешно создан", review.getReviewId());
-        return reviewDbStorage.createReview(review);
+        Review newReview = reviewDbStorage.createReview(review);
+        feedStorage.addFeedEvent(Map.of("userId", newReview.getUserId(), "entityId", newReview.getFilmId()), EventType.REVIEW, OperationType.ADD);
+        return newReview;
     }
 
     @Override
@@ -61,7 +69,9 @@ public class ReviewService implements ReviewStorage {
             throw new EntityNotFoundException("Отзыв с таким id не найден");
         }
         log.info("Отзыв с id = {} успешно обновлен", review.getReviewId());
-        return reviewDbStorage.updateReview(review);
+        Review updatedReview = reviewDbStorage.updateReview(review);
+        feedStorage.addFeedEvent(Map.of("userId", updatedReview.getUserId(), "entityId", updatedReview.getFilmId()), EventType.REVIEW, OperationType.UPDATE);
+        return updatedReview;
     }
 
     @Override
@@ -71,6 +81,7 @@ public class ReviewService implements ReviewStorage {
             throw new EntityNotFoundException("Отзыв с таким id не найден");
         }
         log.info("Отзыв с id = {} успешно удален", reviewId);
+        feedStorage.addFeedEvent(Map.of("entityId", reviewId), EventType.REVIEW, OperationType.REMOVE);
         reviewDbStorage.deleteReview(reviewId);
     }
 

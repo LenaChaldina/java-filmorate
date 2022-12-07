@@ -3,11 +3,9 @@ package ru.yandex.practicum.filmorate.model;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
-import ru.yandex.practicum.filmorate.enums.EventTypeEnum;
-import ru.yandex.practicum.filmorate.enums.OperationTypeEnum;
-
+import ru.yandex.practicum.filmorate.enums.EventType;
+import ru.yandex.practicum.filmorate.enums.OperationType;
 import javax.validation.constraints.NotNull;
-import java.sql.Timestamp;
 
 @Data
 @Builder
@@ -15,13 +13,13 @@ public class Feed {
     @Id
     @NotNull
     Long eventId;
-    Timestamp timestamp;
+    Long timestamp;
     @NotNull
     Integer userId;
     @NotNull
-    EventTypeEnum eventType;
+    EventType eventType;
     @NotNull
-    OperationTypeEnum operationType;
+    OperationType operation;
     @NotNull
     Integer entityId;
 }
