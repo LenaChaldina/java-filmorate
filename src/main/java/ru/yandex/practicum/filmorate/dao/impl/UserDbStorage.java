@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.dao.impl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.UserStorage;
 import ru.yandex.practicum.filmorate.mappers.FilmMapper;
 import ru.yandex.practicum.filmorate.mappers.GenreMapper;
@@ -83,4 +84,36 @@ public class UserDbStorage implements UserStorage {
         }
         return filmWithMpaAndGenres;
     }
+
+    @Override
+    public void deleteUser(int id) {
+        //проверить корректность юзера
+        //удалить из связанных таблиц:
+        //users_friends, films_likes,
+        if (getUsersSqlRowSet(id).next()) {
+            removeUserFriends(id);
+            removeUserLikes(id);
+            String filmSqlQuery = "DELETE FROM users_model WHERE user_id = ?";
+            jdbcTemplate.update(filmSqlQuery, id);
+            log.info("Юзер с id " + id + " удален.");
+        } else {
+            throw new EntityNotFoundException("Юзер с id " + id + " не найден.");
+        }
+    }
+
+    private void removeUserFriends(int id) {
+        String sqlQuery = "DELETE FROM users_friends WHERE user_id = ? or USER_FRIEND_ID = ?";
+        jdbcTemplate.update(sqlQuery, id, id);
+    }
+
+    private void removeUserLikes(int id) {
+        String sqlQuery = "DELETE FROM films_likes WHERE user_id = ?";
+        jdbcTemplate.update(sqlQuery, id);
+    }
+
+    private SqlRowSet getUsersSqlRowSet(int id) {
+        SqlRowSet userRows = jdbcTemplate.queryForRowSet("select * from users_model where user_id = ? ", id);
+        return userRows;
+    }
+
 }

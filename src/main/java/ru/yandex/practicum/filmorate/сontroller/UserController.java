@@ -80,4 +80,9 @@ public class UserController {
     public List<Feed> getFeedByUserId(@PathVariable("id") int userId) {
         return feedService.getFeedByUserId(userId);
     }
+
+    @DeleteMapping("/{id}")
+    public void deleteUser(@PathVariable int id) {
+        userService.deleteUser(id);
+    }
 }

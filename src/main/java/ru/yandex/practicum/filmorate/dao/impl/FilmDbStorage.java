@@ -42,9 +42,10 @@ public class FilmDbStorage implements FilmStorage {
 
     public void deleteFilm(int id) {
         if (getSqlRowSetByFilmId(id).next()) {
+            removeFilmGenres(id);
+            removeFilmLikes(id);
             String filmSqlQuery = "DELETE FROM films_model WHERE film_id = ?";
             jdbcTemplate.update(filmSqlQuery, id);
-            removeFilmGenres(id);
             log.info("Фильм с id " + id + " удален.");
         } else {
             throw new EntityNotFoundException("Фильм с id " + id + " не найден.");
@@ -70,9 +71,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film findFilmById(int id) {
-        if (checkFilmIdExists(id)) {
-            throw new EntityNotFoundException("Фильм с id " + id + " не найден.");
-        }
+        checkFilmIdExists(id);
         Film film = jdbcTemplate.queryForObject("SELECT * FROM films_model WHERE FILM_ID = ?"
                 , new FilmMapper(), id);
         Mpa mpa = jdbcTemplate.queryForObject("select mpa_dictionary.mpa_id, mpa_dictionary.rating from mpa_dictionary where mpa_id =?", new MpaMapper(), film.getMpa().getId());
@@ -85,9 +84,11 @@ public class FilmDbStorage implements FilmStorage {
         return film;
     }
 
-    public boolean checkFilmIdExists(int id) {
+    private void checkFilmIdExists(int id) {
         SqlRowSet filmRows = jdbcTemplate.queryForRowSet("select * from films_model where film_id = ? ", id);
-        return !filmRows.next();
+        if (!filmRows.next()) {
+            throw new EntityNotFoundException("Фильм с id " + id + " не найден.");
+        }
     }
 
     @Override
@@ -145,6 +146,11 @@ public class FilmDbStorage implements FilmStorage {
             filmGenres.add(getGenreFromRow(genreRows));
         }
         return filmGenres;
+    }
+
+    private void removeFilmLikes(int id) {
+        String sqlQuery = "DELETE FROM FILMS_LIKES WHERE film_id = ?";
+        jdbcTemplate.update(sqlQuery, id);
     }
 
     private void checkGenreIdExistence(Film film) {
