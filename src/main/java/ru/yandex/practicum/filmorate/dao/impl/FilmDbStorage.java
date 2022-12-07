@@ -84,11 +84,9 @@ public class FilmDbStorage implements FilmStorage {
         return film;
     }
 
-    private void checkFilmIdExists(int id) {
+    public boolean checkFilmIdExists(int id) {
         SqlRowSet filmRows = jdbcTemplate.queryForRowSet("select * from films_model where film_id = ? ", id);
-        if (!filmRows.next()) {
-            throw new EntityNotFoundException("Фильм с id " + id + " не найден.");
-        }
+        return !filmRows.next();
     }
 
     @Override

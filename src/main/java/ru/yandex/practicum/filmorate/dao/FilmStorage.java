@@ -14,5 +14,8 @@ public interface FilmStorage {
     Film findFilmById(int id);
 
     List<Film> getPopularFilms(int count);
+
     void deleteFilm(int id);
+
+    boolean checkFilmIdExists(int id);
 }

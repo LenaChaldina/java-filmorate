@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.dao.FilmStorage;
 import ru.yandex.practicum.filmorate.dao.LikeStorage;
 import ru.yandex.practicum.filmorate.enums.EventTypeEnum;
 import ru.yandex.practicum.filmorate.enums.OperationTypeEnum;
+import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.List;
@@ -56,6 +57,10 @@ public class FilmService {
     }
 
     public Film findFilmById(int id) {
+        if(filmStorage.checkFilmIdExists(id)) {
+            log.warn("Отзыв не создан, фильм с id {} не найден", id);
+            throw new EntityNotFoundException("Фильм с таким id не найден");
+        }
         return filmStorage.findFilmById(id);
     }
 
