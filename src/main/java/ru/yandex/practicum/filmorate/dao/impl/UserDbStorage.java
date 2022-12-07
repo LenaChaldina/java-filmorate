@@ -88,9 +88,7 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public void deleteUser(int id) {
-        //проверить корректность юзера
-        //удалить из связанных таблиц:
-        //users_friends, films_likes,
+
         if (getUsersSqlRowSet(id).next()) {
             removeUserFriends(id);
             removeUserLikes(id);
