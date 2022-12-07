@@ -24,7 +24,7 @@ public class FriendDbStorage implements FriendStorage {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public int addFriend(int userId, int friendId) {
+    public void addFriend(int userId, int friendId) {
         userExists(userId);
         userExists(friendId);
         String sqlQuery = "INSERT INTO USERS_FRIENDS (USER_ID, USER_FRIEND_ID) VALUES (?, ?)";
@@ -38,10 +38,10 @@ public class FriendDbStorage implements FriendStorage {
         }, keyHolder);
         log.info("Юзер успешно добавлен");
 
-        return Objects.requireNonNull(keyHolder.getKey()).intValue();
+        Objects.requireNonNull(keyHolder.getKey()).intValue();
     }
 
-    public int deleteFriend(int userId, int friendId) {
+    public void deleteFriend(int userId, int friendId) {
         userExists(userId);
         userExists(friendId);
         int rowId = jdbcTemplate.queryForObject("SELECT FRIENDS_ID FROM USERS_FRIENDS WHERE USER_ID = ? AND USER_FRIEND_ID = ?", Integer.class, userId, friendId);
@@ -50,13 +50,11 @@ public class FriendDbStorage implements FriendStorage {
                 userId,
                 friendId);
         log.info("Юзер успешно удален");
-        return rowId;
     }
 
     public List<User> getFriends(int id) {
         SqlRowSet userRows = jdbcTemplate.queryForRowSet("select m.* from users_friends f inner join users_model m on f.user_friend_id = m.user_id where f.user_id = ?", id);
         return getUsersFromDb(userRows);
-
     }
 
     public List<User> getCommonFriends(int userId, int otherId) {
