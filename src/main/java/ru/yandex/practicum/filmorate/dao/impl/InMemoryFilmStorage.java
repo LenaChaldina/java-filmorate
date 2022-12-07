@@ -57,6 +57,16 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
+    public Collection<Film> getDirectorFilmSortedByLike(Integer directorId) {
+        return null;
+    }
+
+    @Override
+    public Collection<Film> getDirectorFilmSortedByYear(Integer directorId) {
+        return null;
+    }
+
+    @Override
     public boolean checkFilmIdExists(int id) {
         return false;
     }

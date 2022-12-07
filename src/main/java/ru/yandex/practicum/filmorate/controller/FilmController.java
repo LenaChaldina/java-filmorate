@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.сontroller;
+package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,13 +7,15 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
+import java.sql.SQLException;
+import java.util.Collection;
 import java.util.List;
 
 @Slf4j
 @RestController
 @RequestMapping("/films")
 public class FilmController {
-    private FilmService filmService;
+    private final FilmService filmService;
 
     @Autowired
     public FilmController(FilmService filmService) {
@@ -70,5 +72,15 @@ public class FilmController {
     @DeleteMapping("/{filmId}")
     public void deleteFilm(@PathVariable int filmId) {
         filmService.deleteFilm(filmId);
+    }
+
+    @GetMapping("/director/{directorId}")
+    public Collection<Film> getFilmsDirectorBySort(@PathVariable Integer directorId
+            , @RequestParam(value = "sortBy") String sort) throws SQLException {
+        if(sort.equals("likes")) {
+            return filmService.getDirectorFilmSortedByLike(directorId);
+        } else {
+            return filmService.getDirectorFilmSortedByYear(directorId);
+        }
     }
 }

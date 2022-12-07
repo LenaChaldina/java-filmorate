@@ -88,12 +88,11 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public void deleteUser(int id) {
-        //проверить корректность юзера
-        //удалить из связанных таблиц:
-        //users_friends, films_likes,
+
         if (getUsersSqlRowSet(id).next()) {
             removeUserFriends(id);
             removeUserLikes(id);
+            removeReviewUser(id);
             String filmSqlQuery = "DELETE FROM users_model WHERE user_id = ?";
             jdbcTemplate.update(filmSqlQuery, id);
             log.info("Юзер с id " + id + " удален.");
@@ -110,6 +109,11 @@ public class UserDbStorage implements UserStorage {
     private void removeUserLikes(int id) {
         String sqlQuery = "DELETE FROM films_likes WHERE user_id = ?";
         jdbcTemplate.update(sqlQuery, id);
+    }
+
+    private void removeReviewUser(int id) {
+        jdbcTemplate.update("DELETE FROM REVIEW_LIKES WHERE user_id = ?", id);
+        jdbcTemplate.update("DELETE FROM REVIEWS WHERE user_id = ?", id);
     }
 
     private SqlRowSet getUsersSqlRowSet(int id) {
