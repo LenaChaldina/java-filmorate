@@ -1,17 +1,15 @@
 package ru.yandex.practicum.filmorate.dao.impl;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.UserStorage;
-import ru.yandex.practicum.filmorate.exceptions.EntityDuplicateException;
 import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.mappers.FilmMapper;
 import ru.yandex.practicum.filmorate.mappers.GenreMapper;
 import ru.yandex.practicum.filmorate.mappers.MpaMapper;
+import ru.yandex.practicum.filmorate.mappers.UserMapper;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
@@ -28,85 +26,32 @@ public class UserDbStorage implements UserStorage {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    @Override
     public User addUser(User user) {
-        //имя для отображения может быть пустым — в таком случае будет использован логин;
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-        }
-        try {
-            String sqlQuery = "INSERT INTO users_model(email, login, name, birthday) VALUES (?, ?, ?, ?)";
-            jdbcTemplate.update(sqlQuery,
-                    user.getEmail(),
-                    user.getLogin(),
-                    user.getName(),
-                    user.getBirthday());
-            log.info("Юзер успешно добавлен");
-            return getUser(user);
-        } catch (DuplicateKeyException e) {
-            throw new EntityDuplicateException("Пользователь с таким логином уже существует в базе");
-        }
+        jdbcTemplate.update("INSERT INTO USERS_MODEL (EMAIL, LOGIN, NAME, BIRTHDAY)" +
+                        " VALUES (?, ?, ?, ?) ", user.getEmail(), user.getLogin(), user.getName()
+                , user.getBirthday());
+
+        return findUserById(user.getId());
     }
 
-    public User getUser(User user) {
-        SqlRowSet userRows = jdbcTemplate.queryForRowSet("select * from users_model where email = ? " +
-                        "and login = ? and name = ? and birthday = ?",
-                user.getEmail(), user.getLogin(), user.getName(), user.getBirthday());
-        if (userRows.next()) {
-            User dbUser = new User(userRows.getString("email"),
-                    userRows.getString("login"), userRows.getString("name"),
-                    userRows.getDate("birthday").toLocalDate());
-            dbUser.setId(userRows.getInt("user_id"));
-            return dbUser;
-        } else {
-            return null;
-        }
-    }
-
+    @Override
     public User putUser(User user) {
-        //имя для отображения может быть пустым — в таком случае будет использован логин;
-        //обновляем если такой юзер найден в базе по Id
-        if (getUsersSqlRowSet(user.getId()).next()) {
-            if (user.getName() == null || user.getName().isBlank()) {
-                user.setName(user.getLogin());
-            }
-            String sqlQuery = "UPDATE users_model SET email = ?, login = ?, name = ?, birthday = ? WHERE users_model.user_id = ?";
-            jdbcTemplate.update(sqlQuery,
-                    user.getEmail(),
-                    user.getLogin(),
-                    user.getName(),
-                    user.getBirthday(),
-                    user.getId());
-            log.info("Юзер успешно обновлен");
-        } else {
-            throw new EntityNotFoundException("Taкого юзера нет в списке");
-        }
-        return getUser(user);
+        jdbcTemplate.update("UPDATE USERS_MODEL SET EMAIL=?, LOGIN=?, NAME=?, BIRTHDAY=? WHERE USER_ID=?",
+                user.getEmail(), user.getLogin(), user.getName(), user.getBirthday(), user.getId());
+
+        return findUserById(user.getId());
     }
 
+    @Override
     public List<User> getUsers() {
-        List<User> allUsers = new ArrayList<>();
-        SqlRowSet userRows = jdbcTemplate.queryForRowSet("select * from users_model");
-        while (userRows.next()) {
-            User dbUser = new User(userRows.getString("email"),
-                    userRows.getString("login"), userRows.getString("name"),
-                    userRows.getDate("birthday").toLocalDate());
-            dbUser.setId(userRows.getInt("user_id"));
-            allUsers.add(dbUser);
-        }
-        return allUsers;
+        return jdbcTemplate.query("SELECT * FROM USERS_MODEL", new UserMapper());
     }
 
+    @Override
     public User findUserById(int id) {
-        SqlRowSet rowSet = getUsersSqlRowSet(id);
-        if (rowSet.next()) {
-            User dbUser = new User(rowSet.getString("email"),
-                    rowSet.getString("login"), rowSet.getString("name"),
-                    rowSet.getDate("birthday").toLocalDate());
-            dbUser.setId(rowSet.getInt("user_id"));
-            return dbUser;
-        } else {
-            throw new EntityNotFoundException("Такого юзера нет");
-        }
+        return jdbcTemplate.queryForObject("SELECT * FROM USERS_MODEL WHERE USER_ID = ?"
+                , new UserMapper(), id);
     }
 
     // 1. Определить фильмы, которые один пролайкал, а другой нет.

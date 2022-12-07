@@ -6,7 +6,9 @@ package ru.yandex.practicum.filmorate.сontroller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Feed;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.FeedService;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
@@ -16,10 +18,12 @@ import java.util.List;
 @RequestMapping("/users")
 public class UserController {
     private UserService userService;
+    private final FeedService feedService;
 
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService, FeedService feedService) {
         this.userService = userService;
+        this.feedService = feedService;
     }
 
     @PostMapping
@@ -70,6 +74,11 @@ public class UserController {
     @GetMapping("/{id}/recommendations")
     public List<Film> getFilmsRecommendations(@PathVariable("id") int userId) {
         return userService.getFilmsRecommendations(userId);
+    }
+
+    @GetMapping("/{id}/feed")
+    public List<Feed> getFeedByUserId(@PathVariable("id") int userId) {
+        return feedService.getFeedByUserId(userId);
     }
 
     @DeleteMapping("/{id}")

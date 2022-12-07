@@ -12,7 +12,10 @@ public interface FilmStorage {
     List<Film> getListFilms();
 
     Film findFilmById(int id);
+
     void deleteFilm(int id);
 
     List<Film> getPopularFilmsWithFilter(int limit, int genreId, int year);
+
+    boolean checkFilmIdExists(int id);
 }

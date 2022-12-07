@@ -101,11 +101,9 @@ public class FilmDbStorage implements FilmStorage {
         return film;
     }
 
-    private void checkFilmIdExists(int id) {
+    public boolean checkFilmIdExists(int id) {
         SqlRowSet filmRows = jdbcTemplate.queryForRowSet("select * from films_model where film_id = ? ", id);
-        if (!filmRows.next()) {
-            throw new EntityNotFoundException("Фильм с id " + id + " не найден.");
-        }
+        return !filmRows.next();
     }
 
     public List<Film> getListFilms() {
@@ -148,7 +146,6 @@ public class FilmDbStorage implements FilmStorage {
 
     private SortedSet<Genre> getFilmGenres(int id) {
         SortedSet<Genre> filmGenres = new TreeSet<>(Comparator.comparingInt(Genre::getId));
-
         String sqlQuery = "SELECT * FROM genre_dictionary WHERE genre_id IN " +
                 "(SELECT genre_id FROM FILMS_GENRES WHERE film_id = ?)";
         SqlRowSet genreRows = jdbcTemplate.queryForRowSet(sqlQuery, id);
