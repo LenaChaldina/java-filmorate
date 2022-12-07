@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.dao.FeedStorage;
 import ru.yandex.practicum.filmorate.enums.EventTypeEnum;
 import ru.yandex.practicum.filmorate.enums.OperationTypeEnum;
 import ru.yandex.practicum.filmorate.model.Feed;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -16,12 +17,10 @@ import java.util.*;
 @Repository("FeedDbStorage")
 public class FeedDbStorage implements FeedStorage {
     private final JdbcTemplate jdbcTemplate;
-    private Map<EventTypeEnum, Integer> eventToNumDictionary;
-    private Map<OperationTypeEnum, Integer> operationToNumDictionary;
-    private Map<Integer, EventTypeEnum> eventToEnumDictionary;
-    private Map<Integer, OperationTypeEnum> operationToEnumDictionary;
-
-
+    private final Map<EventTypeEnum, Integer> eventToNumDictionary;
+    private final Map<OperationTypeEnum, Integer> operationToNumDictionary;
+    private final Map<Integer, EventTypeEnum> eventToEnumDictionary;
+    private final Map<Integer, OperationTypeEnum> operationToEnumDictionary;
 
     public FeedDbStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -60,7 +59,7 @@ public class FeedDbStorage implements FeedStorage {
     public void addFeedEvent(int userId, int entityId, EventTypeEnum eventType, OperationTypeEnum operationType) {
         Optional<Integer> validationResult = ValidationEventData(userId, entityId, eventType);
         int validatedEntityId;
-        if(validationResult.isEmpty()) {
+        if (validationResult.isEmpty()) {
             return;
         } else {
             validatedEntityId = validationResult.get();
@@ -81,18 +80,17 @@ public class FeedDbStorage implements FeedStorage {
     }
 
     private Optional<Integer> ValidationEventData(int userId, int entityId, EventTypeEnum eventType) {
-        if(eventType.equals(EventTypeEnum.LIKE)) {
-            int count = jdbcTemplate.queryForObject("SELECT LIKE_ID from FILMS_LIKES WHERE USER_ID = ? and FILM_ID = ?", Integer.class, userId, entityId);
-            return Optional.of(count);
-        } else if(eventType.equals(EventTypeEnum.REVIEW)) {
-            int count = jdbcTemplate.queryForObject("SELECT REVIEW_ID from reviews WHERE USER_ID = ? and REVIEW_ID = ?", Integer.class, userId, entityId);
-            return Optional.of(count);
-        } else if(eventType.equals(EventTypeEnum.FRIEND)) {
-            int count = jdbcTemplate.queryForObject("SELECT FRIENDS_ID from USERS_FRIENDS WHERE USER_ID = ? and USER_FRIEND_ID = ?", Integer.class, userId, entityId);
-            return Optional.of(count);
+        int newEntityId;
+        if (eventType.equals(EventTypeEnum.LIKE)) {
+            newEntityId = jdbcTemplate.queryForObject("SELECT LIKE_ID from FILMS_LIKES WHERE USER_ID = ? and FILM_ID = ?", Integer.class, userId, entityId);
+        } else if (eventType.equals(EventTypeEnum.REVIEW)) {
+            newEntityId = jdbcTemplate.queryForObject("SELECT REVIEW_ID from reviews WHERE USER_ID = ? and REVIEW_ID = ?", Integer.class, userId, entityId);
+        } else if (eventType.equals(EventTypeEnum.FRIEND)) {
+            newEntityId = jdbcTemplate.queryForObject("SELECT USER_FRIEND_ID from USERS_FRIENDS WHERE USER_ID = ? and USER_FRIEND_ID = ?", Integer.class, userId, entityId);
         } else {
             return Optional.empty();
         }
+        return Optional.of(newEntityId);
     }
 
     private Feed makeFeed(ResultSet rs, int rowNum) throws SQLException {

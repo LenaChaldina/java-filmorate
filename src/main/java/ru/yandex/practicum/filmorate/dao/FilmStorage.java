@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.dao;
 
 import ru.yandex.practicum.filmorate.model.Film;
 
-import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 
@@ -16,9 +15,12 @@ public interface FilmStorage {
     Film findFilmById(int id);
 
     List<Film> getPopularFilms(int count);
+
     void deleteFilm(int id);
 
     Collection<Film> getDirectorFilmSortedByLike(Integer directorId);
 
     Collection<Film> getDirectorFilmSortedByYear(Integer directorId);
+
+    boolean checkFilmIdExists(int id);
 }

@@ -17,4 +17,5 @@ public interface UserStorage {
 
     List<Film> getFilmsRecommendations(int userId);
 
+    void deleteUser(int id);
 }

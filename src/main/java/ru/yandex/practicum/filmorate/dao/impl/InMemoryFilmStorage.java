@@ -61,6 +61,11 @@ public class InMemoryFilmStorage implements FilmStorage {
         return null;
     }
 
+    @Override
+    public boolean checkFilmIdExists(int id) {
+        return false;
+    }
+
     public static class MpaDbStorage {
     }
 }

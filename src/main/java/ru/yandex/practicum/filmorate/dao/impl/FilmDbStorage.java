@@ -127,13 +127,14 @@ public class FilmDbStorage implements FilmStorage {
         jdbcTemplate.update(sqlQuery, id);
     }
 
-    private void removeFilmDirector(int id) {
-        jdbcTemplate.update("DELETE FROM FILM_DIRECTORS WHERE FILM_ID = ?", id);
-    }
-
     private SqlRowSet getSqlRowSetByFilmId(int id) {
         String sqlQuery = "SELECT * FROM films_model WHERE film_id = ?";
         return jdbcTemplate.queryForRowSet(sqlQuery, id);
+    }
+
+    private Genre getGenreFromRow(SqlRowSet genreRow) {
+        return new Genre(genreRow.getInt("genre_id"),
+                genreRow.getString("genre_name"));
     }
 
     private void addFilmGenres(Film film) {
@@ -152,6 +153,11 @@ public class FilmDbStorage implements FilmStorage {
                         , film.getId(), director.getId());
             }
         }
+    }
+
+    private void removeFilmLikes(int id) {
+        String sqlQuery = "DELETE FROM FILMS_LIKES WHERE film_id = ?";
+        jdbcTemplate.update(sqlQuery, id);
     }
 
     private void checkGenreIdExistence(Film film) {
