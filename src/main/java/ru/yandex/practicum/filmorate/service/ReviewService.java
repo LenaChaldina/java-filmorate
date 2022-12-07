@@ -8,7 +8,7 @@ import ru.yandex.practicum.filmorate.dao.ReviewStorage;
 import ru.yandex.practicum.filmorate.dao.impl.FilmDbStorage;
 import ru.yandex.practicum.filmorate.dao.impl.ReviewDbStorage;
 import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
-import ru.yandex.practicum.filmorate.exceptions.RequestErrorForReview;
+import ru.yandex.practicum.filmorate.exceptions.RequestError;
 import ru.yandex.practicum.filmorate.model.Review;
 
 import java.util.Collection;
@@ -34,7 +34,7 @@ public class ReviewService implements ReviewStorage {
     public Review createReview(Review review) {
         if (review.isPositive() == null) {
             log.warn("Отзыв не создан. Не указан тип отзыва");
-            throw new RequestErrorForReview(HttpStatus.BAD_REQUEST, "Не указан тип отзыва");
+            throw new RequestError(HttpStatus.BAD_REQUEST, "Не указан тип отзыва");
         }
         if (!userService.checkOnContainsUser(review.getUserId())) {
             log.warn("Отзыв не создан, пользователь с id {} не найден", review.getUserId());

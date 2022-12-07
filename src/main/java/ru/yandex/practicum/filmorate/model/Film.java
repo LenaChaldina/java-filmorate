@@ -34,6 +34,7 @@ public class Film {
     @NotNull
     Mpa mpa;
     SortedSet<Genre> genres = new TreeSet<>(Comparator.comparingInt(Genre::getId));
+    private List<Director> directors;
     public Film(String name, String description, LocalDate releaseDate, Long duration, Mpa mpa) {
         this.name = name;
         this.description = description;

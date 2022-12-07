@@ -3,9 +3,9 @@ package ru.yandex.practicum.filmorate.exceptions;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-public class RequestErrorForReview extends ResponseStatusException {
+public class RequestError extends ResponseStatusException {
 
-    public RequestErrorForReview(HttpStatus status, String message) {
+    public RequestError(HttpStatus status, String message) {
         super(status, message);
     }
 }

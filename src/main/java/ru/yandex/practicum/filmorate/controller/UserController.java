@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.сontroller;
+package ru.yandex.practicum.filmorate.controller;
 //создание пользователя;
 //обновление пользователя;
 //получение списка всех пользователей.
