@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.dao;
 
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 
@@ -18,4 +19,5 @@ public interface UserStorage {
     List<Film> getFilmsRecommendations(int userId);
 
     void deleteUser(int id);
+    SqlRowSet getUsersSqlRowSet(int id);
 }

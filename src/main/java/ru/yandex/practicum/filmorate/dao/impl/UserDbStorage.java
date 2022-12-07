@@ -93,6 +93,7 @@ public class UserDbStorage implements UserStorage {
             removeUserFriends(id);
             removeUserLikes(id);
             removeReviewUser(id);
+            removeUserFeed(id);
             String filmSqlQuery = "DELETE FROM users_model WHERE user_id = ?";
             jdbcTemplate.update(filmSqlQuery, id);
             log.info("Юзер с id " + id + " удален.");
@@ -111,12 +112,16 @@ public class UserDbStorage implements UserStorage {
         jdbcTemplate.update(sqlQuery, id);
     }
 
+    private void removeUserFeed(int id) {
+        String sqlQuery = "DELETE FROM FEED_MODEL WHERE user_id = ?";
+        jdbcTemplate.update(sqlQuery, id);
+    }
     private void removeReviewUser(int id) {
         jdbcTemplate.update("DELETE FROM REVIEW_LIKES WHERE user_id = ?", id);
         jdbcTemplate.update("DELETE FROM REVIEWS WHERE user_id = ?", id);
     }
 
-    private SqlRowSet getUsersSqlRowSet(int id) {
+    public SqlRowSet getUsersSqlRowSet(int id) {
         SqlRowSet userRows = jdbcTemplate.queryForRowSet("select * from users_model where user_id = ? ", id);
         return userRows;
     }

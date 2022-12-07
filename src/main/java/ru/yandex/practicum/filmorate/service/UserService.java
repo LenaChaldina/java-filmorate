@@ -117,8 +117,9 @@ public class UserService {
     }
 
     public List<User> getFriends(int id) {
-        userStorage.findUserById(id);
-        return friendStorage.getFriends(id);
+            if (userStorage.getUsersSqlRowSet(id).next()){
+                return friendStorage.getFriends(id);
+            } else {throw new EntityNotFoundException("Пользователь был удален из БД");}
     }
 
     public List<User> getCommonFriends(int userId, int otherId) {

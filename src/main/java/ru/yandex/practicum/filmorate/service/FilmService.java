@@ -11,15 +11,11 @@ import ru.yandex.practicum.filmorate.dao.FilmStorage;
 import ru.yandex.practicum.filmorate.dao.LikeStorage;
 import ru.yandex.practicum.filmorate.enums.EventType;
 import ru.yandex.practicum.filmorate.enums.OperationType;
-import ru.yandex.practicum.filmorate.dao.impl.DirectorDbStorage;
-import ru.yandex.practicum.filmorate.enums.EventTypeEnum;
-import ru.yandex.practicum.filmorate.enums.OperationTypeEnum;
 import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.RequestError;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 
-import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -67,7 +63,7 @@ public class FilmService {
     }
 
     public Film findFilmById(int id) {
-        if(filmStorage.checkFilmIdExists(id)) {
+        if (filmStorage.checkFilmIdExists(id)) {
             log.warn("Отзыв не создан, фильм с id {} не найден", id);
             throw new EntityNotFoundException("Фильм с таким id не найден");
         }
@@ -91,7 +87,7 @@ public class FilmService {
     }
 
     public Collection<Film> getDirectorFilmSortedByYear(Integer directorId) {
-        if(checkContainsDirectorInList(directorId)) {
+        if (checkContainsDirectorInList(directorId)) {
             return filmStorage.getDirectorFilmSortedByYear(directorId);
         }
         log.warn("Ошибка. Режиссера с id {} нет в списке", directorId);

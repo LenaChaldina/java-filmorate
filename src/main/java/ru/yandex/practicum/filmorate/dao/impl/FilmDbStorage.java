@@ -12,8 +12,6 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
-import java.sql.Array;
-import java.sql.SQLException;
 import java.util.*;
 
 @Slf4j
@@ -44,10 +42,12 @@ public class FilmDbStorage implements FilmStorage {
 
     public void deleteFilm(int id) {
         if (getSqlRowSetByFilmId(id).next()) {
+            removeFilmGenres(id);
+            removeFilmLikes(id);
+            removeFilmDirector(id);
+            removeFilmReviews(id);
             String filmSqlQuery = "DELETE FROM films_model WHERE film_id = ?";
             jdbcTemplate.update(filmSqlQuery, id);
-            removeFilmGenres(id);
-            removeFilmDirector(id);
             log.info("Фильм с id " + id + " удален.");
         } else {
             throw new EntityNotFoundException("Фильм с id " + id + " не найден.");
@@ -133,6 +133,11 @@ public class FilmDbStorage implements FilmStorage {
 
     private void removeFilmGenres(int id) {
         String sqlQuery = "DELETE FROM films_genres WHERE film_id = ?";
+        jdbcTemplate.update(sqlQuery, id);
+    }
+
+    private void removeFilmReviews(int id) {
+        String sqlQuery = "DELETE FROM REVIEWS WHERE film_id = ?";
         jdbcTemplate.update(sqlQuery, id);
     }
 
