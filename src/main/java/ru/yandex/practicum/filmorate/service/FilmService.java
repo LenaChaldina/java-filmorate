@@ -42,16 +42,16 @@ public class FilmService {
         likeStorage.deleteLike(id, userId);
     }
 
-    public List<Film> getPopularFilms(int count) {
-        return filmStorage.getPopularFilms(count);
-    }
-
     public Film findFilmById(int id) {
         return filmStorage.findFilmById(id);
     }
 
     public void deleteFilm(int id) {
         filmStorage.deleteFilm(id);
+    }
+
+    public List<Film> getPopularFilmsWithFilter(int limit, int genreId, int year) {
+        return filmStorage.getPopularFilmsWithFilter(limit, genreId, year);
     }
 }
 

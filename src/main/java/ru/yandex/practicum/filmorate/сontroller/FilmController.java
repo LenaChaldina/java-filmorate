@@ -9,9 +9,6 @@ import ru.yandex.practicum.filmorate.service.FilmService;
 import javax.validation.Valid;
 import java.util.List;
 
-//добавление фильма;
-//обновление фильма;
-//получение всех фильмов.
 @Slf4j
 @RestController
 @RequestMapping("/films")
@@ -50,12 +47,19 @@ public class FilmController {
         filmService.deleteLike(id, userId);
     }
 
-    //GET /films/popular?count={count} — возвращает список из первых count фильмов по количеству лайков.
-    //Если значение параметра count не задано, верните первые 10.
+    //Возвращает указанный список самых популярных фильмов указанного жанра за нужный год.
+    //Фильтрация должна быть по двум параметрам.
+    //1. По жанру.
+    //2. За указанный год.
+    // API
+    //`GET /films/popular?count={limit}&genreId={genreId}&year={year}`
     @GetMapping("/popular")
-    public List<Film> getPopularFilms(@RequestParam(value = "count", defaultValue = "10",
-            required = false) Integer count) {
-        return filmService.getPopularFilms(count);
+    public List<Film> getPopularFilmsWithFilter(
+            @RequestParam(value = "count", defaultValue = "10", required = false) Integer count,
+            @RequestParam(value = "genreId", defaultValue = "0", required = false) Integer genreId,
+            @RequestParam(value = "year", defaultValue = "0", required = false) Integer year) {
+
+        return filmService.getPopularFilmsWithFilter(count, genreId, year);
     }
 
     @GetMapping("/{id}")

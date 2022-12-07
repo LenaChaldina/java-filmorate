@@ -53,6 +53,23 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
+    public List<Film> getPopularFilmsWithFilter(int limit, int genreId, int year) {
+        List<Film> films = new ArrayList<>();
+        SqlRowSet filmRows = jdbcTemplate.queryForRowSet("select films_model.film_id\n" +
+                "from films_model left join films_likes on films_model.film_id = films_likes.film_id\n" +
+                "LEFT JOIN films_genres on films_model.film_id = films_genres.film_id\n" +
+                "WHERE (films_genres.genre_id = ? OR 0 = ?)\n" +
+                "and (EXTRACT(YEAR from films_model.release_date) = ? or 0 = ?)\n" +
+                "GROUP by films_model.film_id\n" +
+                "ORDER by COUNT(films_likes.like_id) DESC, films_model.film_id\n" +
+                "LIMIT ?;", genreId, genreId, year, year, limit);
+        while (filmRows.next()) {
+            films.add(findFilmById(filmRows.getInt("film_id")));
+        }
+        return films;
+    }
+
+    @Override
     public Film putFilm(Film film) {
         //если фильм с таким id найден - обновляю все поля
         if (getFilmsSqlRowSet(film.getId()).next()) {
@@ -89,14 +106,6 @@ public class FilmDbStorage implements FilmStorage {
         if (!filmRows.next()) {
             throw new EntityNotFoundException("Фильм с id " + id + " не найден.");
         }
-    }
-
-    @Override
-    public List<Film> getPopularFilms(int count) {
-        //самый залайканые фильмы
-        return jdbcTemplate.query("SELECT fm.*, COUNT(fl.like_id) FROM films_model AS fm " +
-                "LEFT OUTER JOIN films_likes AS fl on fm.film_id = fl.film_id " +
-                "GROUP BY fm.film_id ORDER BY COUNT(fl.like_id) DESC LIMIT ?", new FilmMapper(), count);
     }
 
     public List<Film> getListFilms() {
@@ -139,7 +148,6 @@ public class FilmDbStorage implements FilmStorage {
 
     private SortedSet<Genre> getFilmGenres(int id) {
         SortedSet<Genre> filmGenres = new TreeSet<>(Comparator.comparingInt(Genre::getId));
-
 
         String sqlQuery = "SELECT * FROM genre_dictionary WHERE genre_id IN " +
                 "(SELECT genre_id FROM FILMS_GENRES WHERE film_id = ?)";

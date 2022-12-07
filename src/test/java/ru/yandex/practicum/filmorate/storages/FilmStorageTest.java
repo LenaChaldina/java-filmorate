@@ -101,7 +101,7 @@ public class FilmStorageTest {
         likeStorage.addLike(thirdFilmId, firstUser.getId());
         likeStorage.addLike(thirdFilmId, secondUser.getId());
         likeStorage.addLike(secondFilmId, firstUser.getId());
-        List<Film> topFilms = filmStorage.getPopularFilms(10);
+        List<Film> topFilms = filmStorage.getPopularFilmsWithFilter(10, 0, 0);
         System.out.println(topFilms.size());
         System.out.println(topFilms);
         assertEquals("Третий", topFilms.get(0).getName());
