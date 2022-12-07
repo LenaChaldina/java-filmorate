@@ -127,6 +127,10 @@ public class FilmDbStorage implements FilmStorage {
         jdbcTemplate.update(sqlQuery, id);
     }
 
+    private void removeFilmDirector(int id) {
+        jdbcTemplate.update("DELETE FROM FILM_DIRECTORS WHERE FILM_ID = ?", id);
+    }
+
     private SqlRowSet getSqlRowSetByFilmId(int id) {
         String sqlQuery = "SELECT * FROM films_model WHERE film_id = ?";
         return jdbcTemplate.queryForRowSet(sqlQuery, id);
