@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.сontroller;
+package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,7 +86,6 @@ public class FilmController {
 
     @GetMapping("/common")
     public List<Film> getCommonFilms(@RequestParam Integer userId, Integer friendId) {
-        logger.info(String.format("Get common films user id=%s and friend id=%s", userId, friendId));
         return filmService.getCommonFilms(userId, friendId);
     }
 }
