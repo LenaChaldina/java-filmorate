@@ -85,30 +85,6 @@ public class FilmStorageTest {
         assertEquals(3, filmStorage.getListFilms().size());
     }
 
-    @Test
-    public void getMostLikedFilms() {
-        User firstUser = userStorage.addUser(new User("e5k4p3@gmail.com", "e5k4p3", "e5k4p3",
-                LocalDate.of(1995, 7, 11)));
-        User secondUser = userStorage.addUser(new User("mulenas@gmail.com", "Mulenas", "Mulenas",
-                LocalDate.of(1995, 7, 11)));
-        Film secondFilm = new Film("Второй", "Описание второго",
-                LocalDate.of(1999, 8, 15), 50L, gMpa);
-        Film thirdFilm = new Film("Третий", "Описание третьего",
-                LocalDate.of(2007, 4, 7), 50L, pgMpa);
-        filmStorage.addFilm(film);
-        int secondFilmId = filmStorage.addFilm(secondFilm).getId();
-        int thirdFilmId = filmStorage.addFilm(thirdFilm).getId();
-        likeStorage.addLike(thirdFilmId, firstUser.getId());
-        likeStorage.addLike(thirdFilmId, secondUser.getId());
-        likeStorage.addLike(secondFilmId, firstUser.getId());
-        List<Film> topFilms = filmStorage.getPopularFilmsWithFilter(10, 0, 0);
-        System.out.println(topFilms.size());
-        System.out.println(topFilms);
-        assertEquals("Третий", topFilms.get(0).getName());
-        assertEquals("Второй", topFilms.get(1).getName());
-        assertEquals("Название", topFilms.get(2).getName());
-    }
-
     private Film getFilmFromRow(SqlRowSet filmRow) {
         Film film = new Film(filmRow.getString("title"),
                 filmRow.getString("description"),

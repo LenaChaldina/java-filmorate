@@ -15,7 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.сontroller.FilmController;
+import ru.yandex.practicum.filmorate.controller.FilmController;
 import com.google.gson.Gson;
 
 import java.time.LocalDate;
