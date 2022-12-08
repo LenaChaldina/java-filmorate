@@ -1,27 +1,21 @@
 package ru.yandex.practicum.filmorate.сontroller;
 
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
+import java.sql.SQLException;
+import java.util.Collection;
 import java.util.List;
 
-//добавление фильма;
-//обновление фильма;
-//получение всех фильмов.
 @Slf4j
 @RestController
 @RequestMapping("/films")
 public class FilmController {
     private final FilmService filmService;
-
-    private final Logger logger = LoggerFactory.getLogger(FilmController.class);
 
     @Autowired
     public FilmController(FilmService filmService) {
@@ -55,12 +49,19 @@ public class FilmController {
         filmService.deleteLike(id, userId);
     }
 
-    //GET /films/popular?count={count} — возвращает список из первых count фильмов по количеству лайков.
-    //Если значение параметра count не задано, верните первые 10.
+    //Возвращает указанный список самых популярных фильмов указанного жанра за нужный год.
+    //Фильтрация должна быть по двум параметрам.
+    //1. По жанру.
+    //2. За указанный год.
+    // API
+    //`GET /films/popular?count={limit}&genreId={genreId}&year={year}`
     @GetMapping("/popular")
-    public List<Film> getPopularFilms(@RequestParam(value = "count", defaultValue = "10",
-            required = false) Integer count) {
-        return filmService.getPopularFilms(count);
+    public List<Film> getPopularFilmsWithFilter(
+            @RequestParam(value = "count", defaultValue = "10", required = false) Integer count,
+            @RequestParam(value = "genreId", defaultValue = "0", required = false) Integer genreId,
+            @RequestParam(value = "year", defaultValue = "0", required = false) Integer year) {
+
+        return filmService.getPopularFilmsWithFilter(count, genreId, year);
     }
 
     @GetMapping("/{id}")
@@ -71,6 +72,16 @@ public class FilmController {
     @DeleteMapping("/{filmId}")
     public void deleteFilm(@PathVariable int filmId) {
         filmService.deleteFilm(filmId);
+    }
+
+    @GetMapping("/director/{directorId}")
+    public Collection<Film> getFilmsDirectorBySort(@PathVariable Integer directorId
+            , @RequestParam(value = "sortBy") String sort) throws SQLException {
+        if(sort.equals("likes")) {
+            return filmService.getDirectorFilmSortedByLike(directorId);
+        } else {
+            return filmService.getDirectorFilmSortedByYear(directorId);
+        }
     }
 
     @GetMapping("/common")

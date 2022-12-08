@@ -1,15 +1,14 @@
 package ru.yandex.practicum.filmorate.dao.impl;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.UserStorage;
 import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -52,6 +51,21 @@ public class InMemoryUserStorage implements UserStorage {
         } else {
             throw new EntityNotFoundException("Такого юзера нет");
         }
+    }
+
+    @Override
+    public List<Film> getFilmsRecommendations(int userId) {
+        return null;
+    }
+
+    @Override
+    public void deleteUser(int id) {
+
+    }
+
+    @Override
+    public SqlRowSet getUsersSqlRowSet(int id) {
+        return null;
     }
 
 }

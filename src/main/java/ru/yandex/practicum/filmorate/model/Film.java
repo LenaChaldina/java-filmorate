@@ -11,13 +11,11 @@ import lombok.experimental.FieldDefaults;
 import ru.yandex.practicum.filmorate.validation.ReleaseDate;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -33,8 +31,10 @@ public class Film {
     final LocalDate releaseDate;
     @Positive(message = "продолжительность фильма должна быть положительной")
     final Long duration;
-    final Mpa mpa;
-    Set<Genre> genres = new HashSet<>();
+    @NotNull
+    Mpa mpa;
+    SortedSet<Genre> genres = new TreeSet<>(Comparator.comparingInt(Genre::getId));
+    private List<Director> directors;
     public Film(String name, String description, LocalDate releaseDate, Long duration, Mpa mpa) {
         this.name = name;
         this.description = description;

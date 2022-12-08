@@ -31,7 +31,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         return film;
     }
 
-    public List<Film> getFilms() {
+    public List<Film> getListFilms() {
         return new ArrayList<>(films.values());
     }
 
@@ -49,6 +49,26 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public void deleteFilm(int id) {
 
+    }
+
+    @Override
+    public List<Film> getPopularFilmsWithFilter(int limit, int genreId, int year) {
+        return null;
+    }
+
+    @Override
+    public Collection<Film> getDirectorFilmSortedByLike(Integer directorId) {
+        return null;
+    }
+
+    @Override
+    public Collection<Film> getDirectorFilmSortedByYear(Integer directorId) {
+        return null;
+    }
+
+    @Override
+    public boolean checkFilmIdExists(int id) {
+        return false;
     }
 
     @Override

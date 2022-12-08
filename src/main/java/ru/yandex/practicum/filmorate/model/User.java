@@ -17,7 +17,7 @@ import java.util.Set;
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class User {
-    int id;
+    private Integer id;
     @Email(message = "Невалидная почта")
     final String email;
     @NotBlank(message = "логин не может быть пустым")
