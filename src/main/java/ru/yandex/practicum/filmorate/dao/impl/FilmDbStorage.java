@@ -253,7 +253,9 @@ public class FilmDbStorage implements FilmStorage {
         SqlRowSet sqlRowSet = jdbcTemplate.queryForRowSet("" +
                 "select user_likes.FILM_ID from FILMS_LIKES as user_likes " +
                 "inner join FILMS_LIKES as frien_likes on frien_likes.FILM_ID=user_likes.FILM_ID " +
-                "where user_likes.USER_ID = ? and frien_likes.USER_ID = ?", userId, friendId);
+                "where user_likes.USER_ID = ? and frien_likes.USER_ID = ? " +
+                "group by frien_likes.FILM_ID " +
+                "order by count(frien_likes.like_id) desc", userId, friendId);
         while (sqlRowSet.next()) {
             films.add(findFilmById(sqlRowSet.getInt("film_id")));
         }
