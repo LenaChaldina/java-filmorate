@@ -71,6 +71,11 @@ public class InMemoryFilmStorage implements FilmStorage {
         return false;
     }
 
+    @Override
+    public List<Film> searchFilm(String query, List<String> searchBy) {
+        return null;
+    }
+
     public static class MpaDbStorage {
     }
 }
