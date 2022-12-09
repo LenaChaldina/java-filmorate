@@ -250,15 +250,16 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public List<Film> searchFilm(String query, List<String> searchBy) {
         List<Film> films = new ArrayList<>();
+        query = "%" + query.toLowerCase() + "%";
         if (searchBy.contains("director") && searchBy.contains("title")) {
             SqlRowSet searchByTitle = jdbcTemplate.queryForRowSet("" +
                     "select films.FILM_ID from FILMS_MODEL as films " +
-                    "inner join FILM_DIRECTORS as film_dir on film_dir.FILM_ID = films.FILM_ID " +
-                    "inner join DIRECTORS dir on dir.DIRECTOR_ID = film_dir.DIRECTOR_ID " +
-                    "inner join FILMS_LIKES likes on likes.FILM_ID = films.FILM_ID " +
-                    "where TITLE like ? or NAME like ? " +
+                    "left join FILM_DIRECTORS as film_dir on film_dir.FILM_ID = films.FILM_ID " +
+                    "left join DIRECTORS dir on dir.DIRECTOR_ID = film_dir.DIRECTOR_ID " +
+                    "left join FILMS_LIKES likes on likes.FILM_ID = films.FILM_ID " +
+                    "where lower(TITLE) like ? or lower(NAME) like ? " +
                     "group by films.FILM_ID " +
-                    "order by count(likes.like_id) desc", "%" + query + "%", "%" + query + "%");
+                    "order by count(likes.like_id) desc", query, query);
             while (searchByTitle.next()) {
                 films.add(findFilmById(searchByTitle.getInt("film_id")));
             }
@@ -267,23 +268,23 @@ public class FilmDbStorage implements FilmStorage {
         if (searchBy.contains("title")) {
             SqlRowSet searchByTitle = jdbcTemplate.queryForRowSet("" +
                     "select films.FILM_ID from FILMS_MODEL as films " +
-                    "inner join FILMS_LIKES likes on likes.FILM_ID = films.FILM_ID " +
-                    "where TITLE like ? " +
+                    "left join FILMS_LIKES likes on likes.FILM_ID = films.FILM_ID " +
+                    "where lower(TITLE) like ? " +
                     "group by films.FILM_ID " +
-                    "order by count(likes.like_id) desc", "%" + query + "%");
+                    "order by count(likes.like_id) desc", query);
             while (searchByTitle.next()) {
                 films.add(findFilmById(searchByTitle.getInt("film_id")));
             }
         }
         if (searchBy.contains("director")) {
             SqlRowSet searchByTitle = jdbcTemplate.queryForRowSet("" +
-                    "select dir.NAME from DIRECTORS as dir " +
+                    "select films.FILM_ID from DIRECTORS as dir " +
                     "left join FILM_DIRECTORS as film_dir on film_dir.DIRECTOR_ID = dir.DIRECTOR_ID " +
                     "left join FILMS_MODEL films on film_dir.FILM_ID = films.FILM_ID " +
                     "inner join FILMS_LIKES likes on likes.FILM_ID = films.FILM_ID " +
-                    "where NAME like ? " +
+                    "where lower(NAME) like ? " +
                     "group by films.FILM_ID " +
-                    "order by count(likes.like_id) desc", "%" + query + "%", "%" + query + "%");
+                    "order by count(likes.like_id) desc", query);
             while (searchByTitle.next()) {
                 films.add(findFilmById(searchByTitle.getInt("film_id")));
             }
