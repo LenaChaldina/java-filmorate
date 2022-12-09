@@ -105,5 +105,9 @@ public class FilmService {
     public List<Film> searchFilm(String query, List<String> searchBy) {
         return filmStorage.searchFilm(query, searchBy);
     }
+
+    public List<Film> getCommonFilms(Integer userId, Integer friendId) {
+        return filmStorage.getCommonFilms(userId, friendId);
+    }
 }
 

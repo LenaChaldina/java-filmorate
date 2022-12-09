@@ -84,6 +84,11 @@ public class FilmController {
         }
     }
 
+    @GetMapping("/common")
+    public List<Film> getCommonFilms(@RequestParam Integer userId, Integer friendId) {
+        return filmService.getCommonFilms(userId, friendId);
+    }
+
     @GetMapping("/search")
     public List<Film> searchFilmByTitleAndDirector(@RequestParam String query, @RequestParam List<String> by) {
         return filmService.searchFilm(query, by);
