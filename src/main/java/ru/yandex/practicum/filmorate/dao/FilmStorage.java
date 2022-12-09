@@ -22,4 +22,6 @@ public interface FilmStorage {
     Collection<Film> getDirectorFilmSortedByYear(Integer directorId);
 
     boolean checkFilmIdExists(int id);
+
+    List<Film> searchFilm(String query, List<String> searchBy);
 }

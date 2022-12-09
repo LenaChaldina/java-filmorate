@@ -246,4 +246,48 @@ public class FilmDbStorage implements FilmStorage {
         sortedFilmList.addAll(directorFilmList);
         return sortedFilmList;
     }
+
+    @Override
+    public List<Film> searchFilm(String query, List<String> searchBy) {
+        List<Film> films = new ArrayList<>();
+        if (searchBy.contains("director") && searchBy.contains("title")) {
+            SqlRowSet searchByTitle = jdbcTemplate.queryForRowSet("" +
+                    "select films.FILM_ID from FILMS_MODEL as films " +
+                    "inner join FILM_DIRECTORS as film_dir on film_dir.FILM_ID = films.FILM_ID " +
+                    "inner join DIRECTORS dir on dir.DIRECTOR_ID = film_dir.DIRECTOR_ID " +
+                    "inner join FILMS_LIKES likes on likes.FILM_ID = films.FILM_ID " +
+                    "where TITLE like ? or NAME like ? " +
+                    "group by films.FILM_ID " +
+                    "order by count(likes.like_id) desc", "%" + query + "%", "%" + query + "%");
+            while (searchByTitle.next()) {
+                films.add(findFilmById(searchByTitle.getInt("film_id")));
+            }
+            return films;
+        }
+        if (searchBy.contains("title")) {
+            SqlRowSet searchByTitle = jdbcTemplate.queryForRowSet("" +
+                    "select films.FILM_ID from FILMS_MODEL as films " +
+                    "inner join FILMS_LIKES likes on likes.FILM_ID = films.FILM_ID " +
+                    "where TITLE like ? " +
+                    "group by films.FILM_ID " +
+                    "order by count(likes.like_id) desc", "%" + query + "%");
+            while (searchByTitle.next()) {
+                films.add(findFilmById(searchByTitle.getInt("film_id")));
+            }
+        }
+        if (searchBy.contains("director")) {
+            SqlRowSet searchByTitle = jdbcTemplate.queryForRowSet("" +
+                    "select films.FILM_ID from FILMS_MODEL as films " +
+                    "inner join FILM_DIRECTORS as film_dir on film_dir.FILM_ID = films.FILM_ID " +
+                    "inner join DIRECTORS dir on dir.DIRECTOR_ID = film_dir.DIRECTOR_ID " +
+                    "inner join FILMS_LIKES likes on likes.FILM_ID = films.FILM_ID " +
+                    "where NAME like ? " +
+                    "group by films.FILM_ID " +
+                    "order by count(likes.like_id) desc", "%" + query + "%", "%" + query + "%");
+            while (searchByTitle.next()) {
+                films.add(findFilmById(searchByTitle.getInt("film_id")));
+            }
+        }
+        return films;
+    }
 }
