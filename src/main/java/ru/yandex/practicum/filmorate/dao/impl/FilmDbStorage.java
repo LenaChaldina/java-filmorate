@@ -1,9 +1,8 @@
 package ru.yandex.practicum.filmorate.dao.impl;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.dao.FilmStorage;
 import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.mappers.*;
@@ -14,8 +13,7 @@ import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.util.*;
 
-@Slf4j
-@Component("FilmDbStorage")
+@Repository("FilmDbStorage")
 public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
 
@@ -33,25 +31,18 @@ public class FilmDbStorage implements FilmStorage {
                 film.getDuration(),
                 film.getMpa().getId());
         film.setId(getFilmId(film));
-
         addFilmGenres(film);
         addDirectorForFilm(film);
-        log.info("Фильм успешно добавлен");
         return findFilmById(film.getId());
     }
 
     public void deleteFilm(int id) {
-        if (getSqlRowSetByFilmId(id).next()) {
-            removeFilmGenres(id);
-            removeFilmLikes(id);
-            removeFilmDirector(id);
-            removeFilmReviews(id);
-            String filmSqlQuery = "DELETE FROM films_model WHERE film_id = ?";
-            jdbcTemplate.update(filmSqlQuery, id);
-            log.info("Фильм с id " + id + " удален.");
-        } else {
-            throw new EntityNotFoundException("Фильм с id " + id + " не найден.");
-        }
+        removeFilmGenres(id);
+        removeFilmLikes(id);
+        removeFilmDirector(id);
+        removeFilmReviews(id);
+        String filmSqlQuery = "DELETE FROM films_model WHERE film_id = ?";
+        jdbcTemplate.update(filmSqlQuery, id);
     }
 
     @Override
@@ -75,20 +66,13 @@ public class FilmDbStorage implements FilmStorage {
     public Film putFilm(Film film) {
         //если фильм с таким id найден - обновляю все поля
         jdbcTemplate.update("DELETE FROM FILM_DIRECTORS WHERE FILM_ID = ?", film.getId());
-
-        if (getFilmsSqlRowSet(film.getId()).next()) {
-            String sqlQuery = "UPDATE films_model SET title = ?, description = ?, release_date = ?, duration = ?, mpa_id = ? WHERE film_id = ?";
-            jdbcTemplate.update(sqlQuery,
-                    film.getName(), film.getDescription(), film.getReleaseDate(), film.getDuration(), film.getMpa().getId(), film.getId());
-            removeFilmGenres(film.getId());
-            addFilmGenres(film);
-            addDirectorForFilm(film);
-            //film.setGenres(getFilmGenres(film.getId()));
-            log.info("Фильм успешно обновлен");
-            return findFilmById(film.getId());
-        } else {
-            throw new EntityNotFoundException("Фильма с id:" + film.getId() + "нет в базе");
-        }
+        String sqlQuery = "UPDATE films_model SET title = ?, description = ?, release_date = ?, duration = ?, mpa_id = ? WHERE film_id = ?";
+        jdbcTemplate.update(sqlQuery,
+                film.getName(), film.getDescription(), film.getReleaseDate(), film.getDuration(), film.getMpa().getId(), film.getId());
+        removeFilmGenres(film.getId());
+        addFilmGenres(film);
+        addDirectorForFilm(film);
+        return findFilmById(film.getId());
     }
 
     @Override
@@ -127,7 +111,7 @@ public class FilmDbStorage implements FilmStorage {
         return films;
     }
 
-    private SqlRowSet getFilmsSqlRowSet(int id) {
+    public SqlRowSet getFilmsSqlRowSet(int id) {
         return jdbcTemplate.queryForRowSet("select * from films_model where film_id = ? ", id);
     }
 
@@ -145,7 +129,7 @@ public class FilmDbStorage implements FilmStorage {
         jdbcTemplate.update("DELETE FROM FILM_DIRECTORS WHERE FILM_ID = ?", id);
     }
 
-    private SqlRowSet getSqlRowSetByFilmId(int id) {
+    public SqlRowSet getSqlRowSetByFilmId(Integer id) {
         String sqlQuery = "SELECT * FROM films_model WHERE film_id = ?";
         return jdbcTemplate.queryForRowSet(sqlQuery, id);
     }
@@ -219,7 +203,7 @@ public class FilmDbStorage implements FilmStorage {
                 "INNER JOIN FILMS_LIKES ON FILM_DIRECTORS.film_id = FILMS_LIKES.film_id\n" +
                 "WHERE DIRECTORS.director_id = ? \n" +
                 "GROUP BY FILMS_LIKES.film_id\n" +
-                "ORDER BY COUNT(FILMS_LIKES.like_id)", new FilmIdMapper(), directorId);
+                "ORDER BY COUNT(FILMS_LIKES.like_id) DESC", new FilmIdMapper(), directorId);
         if (filmIdList.size() == 0) {
             return getFilmListForDirector(directorId, comparator);
         }

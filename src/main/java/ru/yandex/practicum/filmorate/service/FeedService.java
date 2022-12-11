@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.FeedStorage;
 import ru.yandex.practicum.filmorate.model.Feed;
+
 import java.util.List;
 
 @Service
@@ -16,7 +17,7 @@ public class FeedService {
         this.feedStorage = feedStorage;
     }
 
-    public List<Feed> getFeedByUserId(int userId){
+    public List<Feed> getFeedByUserId(int userId) {
         return feedStorage.getFeedByUserId(userId);
     }
 }

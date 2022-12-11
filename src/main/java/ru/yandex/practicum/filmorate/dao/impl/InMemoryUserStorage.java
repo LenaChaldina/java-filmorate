@@ -8,7 +8,10 @@ import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -67,5 +70,4 @@ public class InMemoryUserStorage implements UserStorage {
     public SqlRowSet getUsersSqlRowSet(int id) {
         return null;
     }
-
 }

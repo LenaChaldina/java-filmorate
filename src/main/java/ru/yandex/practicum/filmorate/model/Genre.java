@@ -5,10 +5,10 @@ import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
 @Data
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal=true)
 public class Genre implements Comparable<Genre>{
-    final int id;
-    final String name;
+    Integer id;
+    String name;
 
     @Override
     public int compareTo(Genre o) {

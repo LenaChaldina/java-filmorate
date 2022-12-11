@@ -11,12 +11,12 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.FeedStorage;
 import ru.yandex.practicum.filmorate.dao.FriendStorage;
+import ru.yandex.practicum.filmorate.dao.UserStorage;
 import ru.yandex.practicum.filmorate.enums.EventType;
 import ru.yandex.practicum.filmorate.enums.OperationType;
 import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.dao.UserStorage;
 
 import java.util.List;
 import java.util.Map;
@@ -113,13 +113,16 @@ public class UserService {
         } else {
             feedStorage.addFeedEvent(Map.of("userId", userId, "entityId", friendId), EventType.FRIEND, OperationType.REMOVE);
             friendStorage.deleteFriend(userId, friendId);
+            log.info("Юзер успешно удален");
         }
     }
 
     public List<User> getFriends(int id) {
-            if (userStorage.getUsersSqlRowSet(id).next()){
-                return friendStorage.getFriends(id);
-            } else {throw new EntityNotFoundException("Пользователь был удален из БД");}
+        if (userStorage.getUsersSqlRowSet(id).next()) {
+            return friendStorage.getFriends(id);
+        } else {
+            throw new EntityNotFoundException("Пользователь был удален из БД");
+        }
     }
 
     public List<User> getCommonFriends(int userId, int otherId) {
@@ -131,7 +134,12 @@ public class UserService {
     }
 
     public void deleteUser(int id) {
-        userStorage.deleteUser(id);
+        if (userStorage.getUsersSqlRowSet(id).next()) {
+            userStorage.deleteUser(id);
+            log.info("Юзер с id " + id + " удален.");
+        } else {
+            throw new EntityNotFoundException("Юзер с id " + id + " не найден.");
+        }
     }
 
     boolean checkOnContainsUser(int userId) {

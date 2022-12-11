@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.dao.impl;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dao.DirectorStorage;
+import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.mappers.DirectorMapper;
 import ru.yandex.practicum.filmorate.model.Director;
 
@@ -27,10 +28,13 @@ public class DirectorDbStorage implements DirectorStorage {
 
     @Override
     public Director updateDirector(Director director) {
-        jdbcTemplate.update("UPDATE DIRECTORS SET NAME = ? WHERE DIRECTOR_ID = ?"
+        Integer rowCount = jdbcTemplate.update("UPDATE DIRECTORS SET NAME = ? WHERE DIRECTOR_ID = ?"
                 , director.getName(), director.getId());
-
-        return getDirectorById(director.getId());
+        if(rowCount < 1) {
+            return null;
+        } else {
+            return getDirectorById(director.getId());
+        }
     }
 
     @Override
@@ -46,7 +50,10 @@ public class DirectorDbStorage implements DirectorStorage {
 
     @Override
     public void deleteDirectorById(Integer id) {
-        jdbcTemplate.update("DELETE FROM FILM_DIRECTORS WHERE DIRECTOR_ID = ?", id);
-        jdbcTemplate.update("DELETE FROM DIRECTORS WHERE DIRECTOR_ID = ?", id);
+        Integer dirCount = jdbcTemplate.update("DELETE FROM FILM_DIRECTORS WHERE DIRECTOR_ID = ?", id);
+        Integer dirFilmCount = jdbcTemplate.update("DELETE FROM DIRECTORS WHERE DIRECTOR_ID = ?", id);
+        if((dirCount < 1) || (dirFilmCount < 1))  {
+            throw new EntityNotFoundException("Такого режиссера нет");
+        }
     }
 }

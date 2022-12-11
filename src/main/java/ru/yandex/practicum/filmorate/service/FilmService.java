@@ -39,11 +39,18 @@ public class FilmService {
     }
 
     public Film addFilm(Film film) {
-        return filmStorage.addFilm(film);
+        Film savedFilm = filmStorage.addFilm(film);
+        log.info("Фильм успешно добавлен");
+        return savedFilm;
     }
 
     public Film putFilm(Film film) {
-        return filmStorage.putFilm(film);
+        if (filmStorage.getFilmsSqlRowSet(film.getId()).next()) {
+            log.info("Фильм успешно обновлен");
+            return filmStorage.putFilm(film);
+        } else {
+            throw new EntityNotFoundException("Фильма с id:" + film.getId() + "нет в базе");
+        }
     }
 
     public List<Film> getFilms() {
@@ -53,6 +60,7 @@ public class FilmService {
     public void putLike(int id, int userId) {
         likeStorage.addLike(id, userId);
         feedStorage.addFeedEvent(Map.of("userId", userId, "entityId", id), EventType.LIKE, OperationType.ADD);
+        log.info("Пользователь с id " + userId + " поставил лайк фильму с id " + id + ".");
     }
 
     public void deleteLike(int id, int userId) {
@@ -60,6 +68,7 @@ public class FilmService {
         likeStorage.checkUserId(userId);
         feedStorage.addFeedEvent(Map.of("userId", userId, "entityId", id), EventType.LIKE, OperationType.REMOVE);
         likeStorage.deleteLike(id, userId);
+        log.info("Пользователь с id " + userId + " убрал лайк с фильма с id " + id + ".");
     }
 
     public Film findFilmById(int id) {
@@ -71,7 +80,12 @@ public class FilmService {
     }
 
     public void deleteFilm(int id) {
-        filmStorage.deleteFilm(id);
+        if (filmStorage.getSqlRowSetByFilmId(id).next()) {
+            filmStorage.deleteFilm(id);
+            log.info("Фильм с id " + id + " удален.");
+        } else {
+            throw new EntityNotFoundException("Фильм с id " + id + " не найден.");
+        }
     }
 
     public List<Film> getPopularFilmsWithFilter(int limit, int genreId, int year) {

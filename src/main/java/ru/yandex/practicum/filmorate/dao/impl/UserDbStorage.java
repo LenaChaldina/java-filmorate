@@ -1,9 +1,8 @@
 package ru.yandex.practicum.filmorate.dao.impl;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.dao.UserStorage;
 import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.mappers.FilmMapper;
@@ -17,8 +16,7 @@ import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.*;
 
-@Slf4j
-@Component("UserDbStorage")
+@Repository("UserDbStorage")
 public class UserDbStorage implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
 
@@ -88,18 +86,12 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public void deleteUser(int id) {
-
-        if (getUsersSqlRowSet(id).next()) {
             removeUserFriends(id);
             removeUserLikes(id);
             removeReviewUser(id);
             removeUserFeed(id);
             String filmSqlQuery = "DELETE FROM users_model WHERE user_id = ?";
             jdbcTemplate.update(filmSqlQuery, id);
-            log.info("Юзер с id " + id + " удален.");
-        } else {
-            throw new EntityNotFoundException("Юзер с id " + id + " не найден.");
-        }
     }
 
     private void removeUserFriends(int id) {
@@ -116,6 +108,7 @@ public class UserDbStorage implements UserStorage {
         String sqlQuery = "DELETE FROM FEED_MODEL WHERE user_id = ?";
         jdbcTemplate.update(sqlQuery, id);
     }
+
     private void removeReviewUser(int id) {
         jdbcTemplate.update("DELETE FROM REVIEW_LIKES WHERE user_id = ?", id);
         jdbcTemplate.update("DELETE FROM REVIEWS WHERE user_id = ?", id);
@@ -125,5 +118,4 @@ public class UserDbStorage implements UserStorage {
         SqlRowSet userRows = jdbcTemplate.queryForRowSet("select * from users_model where user_id = ? ", id);
         return userRows;
     }
-
 }

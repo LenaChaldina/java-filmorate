@@ -5,7 +5,6 @@ import ru.yandex.practicum.filmorate.model.Director;
 import java.util.Collection;
 
 public interface DirectorStorage {
-
     Director createDirector(Director director);
 
     Director updateDirector(Director director);

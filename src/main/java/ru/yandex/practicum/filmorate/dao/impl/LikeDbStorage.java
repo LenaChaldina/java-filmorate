@@ -1,18 +1,14 @@
 package ru.yandex.practicum.filmorate.dao.impl;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.dao.LikeStorage;
 import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
 
 import java.sql.PreparedStatement;
 
-@Slf4j
-@Component("LikeDbStorage")
+@Repository("LikeDbStorage")
 
 public class LikeDbStorage implements LikeStorage {
     private final JdbcTemplate jdbcTemplate;
@@ -33,7 +29,6 @@ public class LikeDbStorage implements LikeStorage {
             ps.setInt(2, userId);
             return ps;
         });
-        log.info("Пользователь с id " + userId + " поставил лайк фильму с id " + filmId + ".");
     }
 
     @Override
@@ -42,7 +37,6 @@ public class LikeDbStorage implements LikeStorage {
         checkUserId(userId);
         String sqlQuery = "DELETE FROM films_likes WHERE film_id = ? AND user_id = ?";
         jdbcTemplate.update(sqlQuery, filmId, userId);
-        log.info("Пользователь с id " + userId + " убрал лайк с фильма с id " + filmId + ".");
     }
 
     public void checkFilmId(int filmId) {

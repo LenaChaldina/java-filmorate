@@ -42,7 +42,4 @@ public class Film {
         this.duration = duration;
         this.mpa = mpa;
     }
-
-
-
 }
