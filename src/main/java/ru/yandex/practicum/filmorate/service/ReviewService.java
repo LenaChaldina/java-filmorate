@@ -12,10 +12,10 @@ import ru.yandex.practicum.filmorate.enums.EventType;
 import ru.yandex.practicum.filmorate.enums.OperationType;
 import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.RequestError;
+import ru.yandex.practicum.filmorate.model.Feed;
 import ru.yandex.practicum.filmorate.model.Review;
 
 import java.util.Collection;
-import java.util.Map;
 
 @Service
 @Slf4j
@@ -58,7 +58,16 @@ public class ReviewService implements ReviewStorage {
         }
         log.info("Отзыв с id = {} успешно создан", review.getReviewId());
         Review newReview = reviewDbStorage.createReview(review);
-        feedStorage.addFeedEvent(Map.of("userId", newReview.getUserId(), "entityId", newReview.getFilmId()), EventType.REVIEW, OperationType.ADD);
+        if(feedStorage.addFeedEvent(Feed.builder().userId(newReview.getUserId()).entityId(newReview.getReviewId()).eventType(EventType.REVIEW).operation(OperationType.ADD).build()) != 1) {
+            log.warn("Ошибка добавления события userId = {}, entityId = {}, eventType = {}, operation = {} в ленту!",
+                    newReview.getUserId(),
+                    newReview.getReviewId(),
+                    EventType.REVIEW,
+                    OperationType.ADD);
+            throw new RequestError(HttpStatus.INTERNAL_SERVER_ERROR,"Событие не добавлено в ленту!");
+        } else {
+            log.info("Добавлено событие в ленту!");
+        }
         return newReview;
     }
 
@@ -70,7 +79,16 @@ public class ReviewService implements ReviewStorage {
         }
         log.info("Отзыв с id = {} успешно обновлен", review.getReviewId());
         Review updatedReview = reviewDbStorage.updateReview(review);
-        feedStorage.addFeedEvent(Map.of("userId", updatedReview.getUserId(), "entityId", updatedReview.getFilmId()), EventType.REVIEW, OperationType.UPDATE);
+        if(feedStorage.addFeedEvent(Feed.builder().userId(updatedReview.getUserId()).entityId(updatedReview.getFilmId()).eventType(EventType.REVIEW).operation(OperationType.UPDATE).build()) != 1) {
+            log.warn("Ошибка добавления события userId = {}, entityId = {}, eventType = {}, operation = {} в ленту!",
+                    updatedReview.getUserId(),
+                    updatedReview.getFilmId(),
+                    EventType.REVIEW,
+                    OperationType.UPDATE);
+            throw new RequestError(HttpStatus.INTERNAL_SERVER_ERROR,"Событие не добавлено в ленту!");
+        } else {
+            log.info("Добавлено событие в ленту!");
+        }
         return updatedReview;
     }
 
@@ -81,7 +99,15 @@ public class ReviewService implements ReviewStorage {
             throw new EntityNotFoundException("Отзыв с таким id не найден");
         }
         log.info("Отзыв с id = {} успешно удален", reviewId);
-        feedStorage.addFeedEvent(Map.of("entityId", reviewId), EventType.REVIEW, OperationType.REMOVE);
+        if(feedStorage.addFeedEvent(Feed.builder().entityId(reviewId).eventType(EventType.REVIEW).operation(OperationType.REMOVE).build()) != 1) {
+            log.warn("Ошибка добавления события entityId = {}, eventType = {}, operation = {} в ленту!",
+                    reviewId,
+                    EventType.REVIEW,
+                    OperationType.REMOVE);
+            throw new RequestError( HttpStatus.INTERNAL_SERVER_ERROR,"Событие не добавлено в ленту!");
+        } else {
+            log.info("Добавлено событие в ленту!");
+        }
         reviewDbStorage.deleteReview(reviewId);
     }
 
