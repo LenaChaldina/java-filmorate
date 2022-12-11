@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.dao.impl;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.dao.FeedStorage;
 import ru.yandex.practicum.filmorate.enums.EventType;
@@ -57,50 +56,23 @@ public class FeedDbStorage implements FeedStorage {
     }
 
     @Override
-    public void addFeedEvent(Map<String, Integer> parameters, EventType eventType, OperationType operation) {
-        Map<String, Integer> data = ValidationEventData(parameters, eventType, operation);
-
+    public void addFeedEvent(Feed feed) {
         SimpleJdbcInsert simpleJdbcInsertFilm = new SimpleJdbcInsert(this.jdbcTemplate)
                 .withTableName("FEED_MODEL")
                 .usingGeneratedKeyColumns("EVENT_ID");
 
+        if(feed.getEventType().equals(EventType.REVIEW) && feed.getOperation().equals(OperationType.REMOVE)) {
+            getUserIdForDeleteReviewEvent(feed);
+        }
+
         final Map<String, Object> dataToInsert = new HashMap<>();
         dataToInsert.put("TIMESTAMP", Timestamp.valueOf(LocalDateTime.now()).getTime());
-        dataToInsert.put("USER_ID", data.get("userId"));
-        dataToInsert.put("EVENT_TYPE", eventToNumDictionary.get(eventType));
-        dataToInsert.put("OPERATION_TYPE", operationToNumDictionary.get(operation));
-        dataToInsert.put("ENTITY_ID", data.get("entityId"));
+        dataToInsert.put("USER_ID", feed.getUserId());
+        dataToInsert.put("EVENT_TYPE", eventToNumDictionary.get(feed.getEventType()));
+        dataToInsert.put("OPERATION_TYPE", operationToNumDictionary.get(feed.getOperation()));
+        dataToInsert.put("ENTITY_ID", feed.getEntityId());
 
         simpleJdbcInsertFilm.execute(dataToInsert);
-    }
-
-    private Map<String, Integer> ValidationEventData(Map<String, Integer> parameters, EventType eventType, OperationType operation) {
-        Map<String, Integer> result = new HashMap<>();
-        SqlRowSet rowSet;
-        if (eventType.equals(EventType.LIKE)) {
-            rowSet = jdbcTemplate.queryForRowSet("SELECT USER_ID, FILM_ID from FILMS_LIKES WHERE USER_ID = ? and FILM_ID = ?", parameters.get("userId"), parameters.get("entityId"));
-            if (rowSet.next()) {
-                result.put("userId", rowSet.getInt("USER_ID"));
-                result.put("entityId", rowSet.getInt("FILM_ID"));
-            }
-        } else if (eventType.equals(EventType.REVIEW)) {
-            if (operation.equals(OperationType.REMOVE)) {
-                rowSet = jdbcTemplate.queryForRowSet("SELECT USER_ID, REVIEW_ID from reviews WHERE REVIEW_ID = ?", parameters.get("entityId"));
-            } else {
-                rowSet = jdbcTemplate.queryForRowSet("SELECT USER_ID, REVIEW_ID from reviews WHERE USER_ID = ? and FILM_ID = ?", parameters.get("userId"), parameters.get("entityId"));
-            }
-            if (rowSet.next()) {
-                result.put("userId", rowSet.getInt("USER_ID"));
-                result.put("entityId", rowSet.getInt("REVIEW_ID"));
-            }
-        } else if (eventType.equals(EventType.FRIEND)) {
-            rowSet = jdbcTemplate.queryForRowSet("SELECT USER_ID, USER_FRIEND_ID from USERS_FRIENDS WHERE USER_ID = ? and USER_FRIEND_ID = ?", parameters.get("userId"), parameters.get("entityId"));
-            if (rowSet.next()) {
-                result.put("userId", rowSet.getInt("USER_ID"));
-                result.put("entityId", rowSet.getInt("USER_FRIEND_ID"));
-            }
-        }
-        return result;
     }
 
     private Feed makeFeed(ResultSet rs, int rowNum) throws SQLException {
@@ -112,5 +84,10 @@ public class FeedDbStorage implements FeedStorage {
                 .operation(operationToEnumDictionary.get(rs.getInt("OPERATION_TYPE")))
                 .entityId(rs.getInt("ENTITY_ID"))
                 .build();
+    }
+
+    private void getUserIdForDeleteReviewEvent(Feed feed) {
+        int userId = jdbcTemplate.queryForObject("SELECT USER_ID from reviews WHERE REVIEW_ID = ?", Integer.class, feed.getEntityId());
+        feed.setUserId(userId);
     }
 }

@@ -12,10 +12,10 @@ import ru.yandex.practicum.filmorate.enums.EventType;
 import ru.yandex.practicum.filmorate.enums.OperationType;
 import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.RequestError;
+import ru.yandex.practicum.filmorate.model.Feed;
 import ru.yandex.practicum.filmorate.model.Review;
 
 import java.util.Collection;
-import java.util.Map;
 
 @Service
 @Slf4j
@@ -58,7 +58,7 @@ public class ReviewService implements ReviewStorage {
         }
         log.info("Отзыв с id = {} успешно создан", review.getReviewId());
         Review newReview = reviewDbStorage.createReview(review);
-        feedStorage.addFeedEvent(Map.of("userId", newReview.getUserId(), "entityId", newReview.getFilmId()), EventType.REVIEW, OperationType.ADD);
+        feedStorage.addFeedEvent(Feed.builder().userId(newReview.getUserId()).entityId(newReview.getReviewId()).eventType(EventType.REVIEW).operation(OperationType.ADD).build());
         return newReview;
     }
 
@@ -70,7 +70,7 @@ public class ReviewService implements ReviewStorage {
         }
         log.info("Отзыв с id = {} успешно обновлен", review.getReviewId());
         Review updatedReview = reviewDbStorage.updateReview(review);
-        feedStorage.addFeedEvent(Map.of("userId", updatedReview.getUserId(), "entityId", updatedReview.getFilmId()), EventType.REVIEW, OperationType.UPDATE);
+        feedStorage.addFeedEvent(Feed.builder().userId(updatedReview.getUserId()).entityId(updatedReview.getFilmId()).eventType(EventType.REVIEW).operation(OperationType.UPDATE).build());
         return updatedReview;
     }
 
@@ -81,7 +81,8 @@ public class ReviewService implements ReviewStorage {
             throw new EntityNotFoundException("Отзыв с таким id не найден");
         }
         log.info("Отзыв с id = {} успешно удален", reviewId);
-        feedStorage.addFeedEvent(Map.of("entityId", reviewId), EventType.REVIEW, OperationType.REMOVE);
+        feedStorage.addFeedEvent(Feed.builder().entityId(reviewId).eventType(EventType.REVIEW).operation(OperationType.REMOVE).build());
+
         reviewDbStorage.deleteReview(reviewId);
     }
 
