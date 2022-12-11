@@ -174,7 +174,7 @@ public class ReviewService implements ReviewStorage {
             throw new EntityNotFoundException("Пользователь с таким id не найден");
         }
         if (reviewDbStorage.checkContainsLikeInReview(reviewId, userId)) {
-            log.warn("Дислайк не удален, пользователь с id {} не ставил дислайк посту с id {}", userId, reviewId);
+            log.warn("Дислайк не удален, пользователь с id {} не ставил лайк посту с id {}", userId, reviewId);
             throw new EntityNotFoundException("Пользователь уже добавил дислайк");
         }
     }
