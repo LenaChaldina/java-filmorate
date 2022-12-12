@@ -33,7 +33,7 @@ public class FilmDbStorage implements FilmStorage {
         film.setId(getFilmId(film));
         addFilmGenres(film);
         addDirectorForFilm(film);
-        return findFilmById(film.getId());
+        return film;
     }
 
     public void deleteFilm(int id) {
@@ -47,17 +47,45 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> getPopularFilmsWithFilter(int limit, int genreId, int year) {
+
+        SqlRowSet filmRows = jdbcTemplate.queryForRowSet("select FM.FILM_ID, FM.TITLE, FM.DESCRIPTION, FM.release_date,FM.DURATION, FM.MPA_ID, MD.RATING,\n" +
+                "       TRIM(BOTH ']' from TRIM(BOTH '[' FROM ARRAY_AGG(GD.GENRE_ID))) as GENRE_ID ,\n" +
+                "       TRIM(BOTH ']' from TRIM(BOTH '[' FROM TRIM(BOTH '}' from TRIM(BOTH '{' FROM ARRAY_AGG(GD.GENRE_NAME))))) as GENRE_N\n" +
+                "from FILMS_MODEL FM\n" +
+                "                inner join MPA_DICTIONARY MD on FM.MPA_ID = MD.MPA_ID\n" +
+                "                left join films_likes on FM.film_id = films_likes.film_id\n" +
+                "                LEFT JOIN films_genres on FM.film_id = films_genres.film_id\n" +
+                "                LEFT JOIN GENRE_DICTIONARY GD on FILMS_GENRES.GENRE_ID = GD.GENRE_ID\n" +
+                "                WHERE (films_genres.genre_id = ? OR 0 = ?)\n" +
+                "                and (EXTRACT(YEAR from FM.release_date) = ? or 0 = ?)\n" +
+                "                GROUP by FM.film_id\n" +
+                "                ORDER by COUNT(films_likes.like_id) DESC, FM.film_id\n" +
+                "                LIMIT ?;", genreId, genreId, year, year, limit);
+
+        return getListFilms(filmRows);
+    }
+
+    private List<Film> getListFilms(SqlRowSet filmRows) {
         List<Film> films = new ArrayList<>();
-        SqlRowSet filmRows = jdbcTemplate.queryForRowSet("select films_model.film_id\n" +
-                "from films_model left join films_likes on films_model.film_id = films_likes.film_id\n" +
-                "LEFT JOIN films_genres on films_model.film_id = films_genres.film_id\n" +
-                "WHERE (films_genres.genre_id = ? OR 0 = ?)\n" +
-                "and (EXTRACT(YEAR from films_model.release_date) = ? or 0 = ?)\n" +
-                "GROUP by films_model.film_id\n" +
-                "ORDER by COUNT(films_likes.like_id) DESC, films_model.film_id\n" +
-                "LIMIT ?;", genreId, genreId, year, year, limit);
         while (filmRows.next()) {
-            films.add(findFilmById(filmRows.getInt("film_id")));
+            SortedSet<Genre> genres = new TreeSet<>(Comparator.comparingInt(Genre::getId));
+            String ids = filmRows.getString("GENRE_ID");
+            if (!ids.equals("null")) {
+                int[] genreIds = Arrays.stream(ids.split(", ")).mapToInt(Integer::parseInt).toArray();
+                String[] genreNames = filmRows.getString("GENRE_N").split(", ");
+                for (int i = 0; i < genreIds.length; i++) {
+                    genres.add(new Genre(genreIds[i], genreNames[i]));
+                }
+            }
+            Film film = new Film(
+                    filmRows.getString("title"),
+                    filmRows.getString("description"),
+                    filmRows.getDate("release_date").toLocalDate(),
+                    filmRows.getLong("duration"),
+                    new Mpa(filmRows.getInt("mpa_id"), filmRows.getString("RATING")));
+            film.setId(filmRows.getInt("film_id"));
+            film.setGenres(genres);
+            films.add(film);
         }
         return films;
     }
@@ -76,7 +104,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Film findFilmById(int id) {
+  /*  public Film findFilmById(int id) {
         if (checkFilmIdExists(id)) {
             throw new EntityNotFoundException("Фильм с id " + id + " не найден.");
         }
@@ -94,6 +122,24 @@ public class FilmDbStorage implements FilmStorage {
         genresSet.addAll(genres);
         film.setGenres(genresSet);
         film.setDirectors(directorList);
+        return film;
+    }*/
+    public Film findFilmById(int id) {
+        if (checkFilmIdExists(id)) {
+            throw new EntityNotFoundException("Фильм с id " + id + " не найден.");
+        }
+        Film film = jdbcTemplate.queryForObject("select FM.FILM_ID, FM.TITLE, FM.DESCRIPTION, FM.release_date,FM.DURATION, FM.MPA_ID, MD.RATING,\n" +
+                        "       TRIM(BOTH ']' from TRIM(BOTH '[' FROM ARRAY_AGG(GD.GENRE_ID))) as GENRE_ID ,\n" +
+                        "       TRIM(BOTH ']' from TRIM(BOTH '[' FROM TRIM(BOTH '}' from TRIM(BOTH '{' FROM ARRAY_AGG(GD.GENRE_NAME))))) as GENRE_N\n" +
+                        "       from FILMS_MODEL FM\n" +
+                        "                 inner join MPA_DICTIONARY MD\n" +
+                        "                 on FM.MPA_ID = MD.MPA_ID\n" +
+                        "                 left join FILMS_GENRES FG\n" +
+                        "                     on FM.FILM_ID = FG.FILM_ID\n" +
+                        "                 left join GENRE_DICTIONARY GD on FG.GENRE_ID = GD.GENRE_ID\n" +
+                        "                 group by FM.FILM_ID, FM.TITLE, FM.MPA_ID, MD.RATING\n" +
+                        "                  having FM.FILM_ID = ?;"
+                , new FilmMapper(), id);
         return film;
     }
 
