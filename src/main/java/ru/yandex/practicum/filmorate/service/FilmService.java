@@ -14,11 +14,11 @@ import ru.yandex.practicum.filmorate.enums.OperationType;
 import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.RequestError;
 import ru.yandex.practicum.filmorate.model.Director;
+import ru.yandex.practicum.filmorate.model.Feed;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 @Service
 @Slf4j
@@ -59,14 +59,32 @@ public class FilmService {
 
     public void putLike(int id, int userId) {
         likeStorage.addLike(id, userId);
-        feedStorage.addFeedEvent(Map.of("userId", userId, "entityId", id), EventType.LIKE, OperationType.ADD);
+        if(feedStorage.addFeedEvent(Feed.builder().userId(userId).entityId(id).eventType(EventType.LIKE).operation(OperationType.ADD).build()) != 1) {
+            log.warn("Ошибка добавления события userId = {}, entityId = {}, eventType = {}, operation = {} в ленту!",
+                    userId,
+                    id,
+                    EventType.LIKE,
+                    OperationType.ADD);
+            throw new RequestError( HttpStatus.INTERNAL_SERVER_ERROR,"Событие не добавлено в ленту!");
+        } else {
+            log.info("Добавлено событие в ленту!");
+        }
         log.info("Пользователь с id " + userId + " поставил лайк фильму с id " + id + ".");
     }
 
     public void deleteLike(int id, int userId) {
         likeStorage.checkFilmId(id);
         likeStorage.checkUserId(userId);
-        feedStorage.addFeedEvent(Map.of("userId", userId, "entityId", id), EventType.LIKE, OperationType.REMOVE);
+        if(feedStorage.addFeedEvent(Feed.builder().userId(userId).entityId(id).eventType(EventType.LIKE).operation(OperationType.REMOVE).build()) != 1) {
+            log.warn("Ошибка добавления события userId = {}, entityId = {}, eventType = {}, operation = {} в ленту!",
+                    userId,
+                    id,
+                    EventType.LIKE,
+                    OperationType.REMOVE);
+            throw new RequestError( HttpStatus.INTERNAL_SERVER_ERROR,"Событие не добавлено в ленту!");
+        } else {
+            log.info("Добавлено событие в ленту!");
+        }
         likeStorage.deleteLike(id, userId);
         log.info("Пользователь с id " + userId + " убрал лайк с фильма с id " + id + ".");
     }

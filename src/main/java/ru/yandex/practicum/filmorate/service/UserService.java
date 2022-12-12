@@ -8,6 +8,7 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.FeedStorage;
 import ru.yandex.practicum.filmorate.dao.FriendStorage;
@@ -15,11 +16,12 @@ import ru.yandex.practicum.filmorate.dao.UserStorage;
 import ru.yandex.practicum.filmorate.enums.EventType;
 import ru.yandex.practicum.filmorate.enums.OperationType;
 import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.RequestError;
+import ru.yandex.practicum.filmorate.model.Feed;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Service
@@ -100,7 +102,16 @@ public class UserService {
             log.info("Пользователи {} и {} подружились", userStorage.findUserById(friendId).getName()
                     , userStorage.findUserById(userId).getName());
             friendStorage.addFriend(userId, friendId);
-            feedStorage.addFeedEvent(Map.of("userId", userId, "entityId", friendId), EventType.FRIEND, OperationType.ADD);
+            if(feedStorage.addFeedEvent(Feed.builder().userId(userId).entityId(friendId).eventType(EventType.FRIEND).operation(OperationType.ADD).build()) != 1) {
+                log.warn("Ошибка добавления события userId = {}, entityId = {}, eventType = {}, operation = {} в ленту!",
+                        userId,
+                        friendId,
+                        EventType.FRIEND,
+                        OperationType.ADD);
+                throw new RequestError( HttpStatus.INTERNAL_SERVER_ERROR,"Событие не добавлено в ленту!");
+            } else {
+                log.info("Добавлено событие в ленту!");
+            }
         }
     }
 
@@ -111,7 +122,16 @@ public class UserService {
         if (userStorage.findUserById(friendId) == null) {
             throw new EntityNotFoundException("Такого друга " + friendId + "нет");
         } else {
-            feedStorage.addFeedEvent(Map.of("userId", userId, "entityId", friendId), EventType.FRIEND, OperationType.REMOVE);
+            if(feedStorage.addFeedEvent(Feed.builder().userId(userId).entityId(friendId).eventType(EventType.FRIEND).operation(OperationType.REMOVE).build()) != 1) {
+                log.warn("Ошибка добавления события userId = {}, entityId = {}, eventType = {}, operation = {} в ленту!",
+                        userId,
+                        friendId,
+                        EventType.FRIEND,
+                        OperationType.REMOVE);
+                throw new RequestError( HttpStatus.INTERNAL_SERVER_ERROR,"Событие не добавлено в ленту!");
+            } else {
+                log.info("Добавлено событие в ленту!");
+            }
             friendStorage.deleteFriend(userId, friendId);
             log.info("Юзер успешно удален");
         }
