@@ -242,39 +242,35 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     public Collection<Film> getDirectorFilmSortedByLike(Integer directorId) {
-        Comparator<Film> comparator = Comparator.comparing(Film::getId);
-        Collection<Film> sortDirectorFilmListByLike = new ArrayList<>();
-        Collection<Integer> filmIdList = jdbcTemplate.query("SELECT FILMS_LIKES.film_id, COUNT(FILMS_LIKES.like_id)\n" +
-                "FROM DIRECTORS INNER JOIN FILM_DIRECTORS on DIRECTORS.director_id = FILM_DIRECTORS.director_id\n" +
-                "INNER JOIN FILMS_LIKES ON FILM_DIRECTORS.film_id = FILMS_LIKES.film_id\n" +
-                "WHERE DIRECTORS.director_id = ? \n" +
-                "GROUP BY FILMS_LIKES.film_id\n" +
+        Collection<Film> films = new ArrayList<>();
+        Collection<Integer> filmIdList = jdbcTemplate.query("SELECT FILM_DIRECTORS.film_id, COUNT(FILMS_LIKES.like_id) " +
+                "FROM DIRECTORS\n" +
+                "INNER JOIN FILM_DIRECTORS on DIRECTORS.director_id = FILM_DIRECTORS.director_id\n" +
+                "LEFT JOIN FILMS_LIKES ON FILM_DIRECTORS.film_id = FILMS_LIKES.film_id\n" +
+                "WHERE DIRECTORS.director_id = ?\n" +
+                "GROUP BY FILM_DIRECTORS.film_id\n" +
                 "ORDER BY COUNT(FILMS_LIKES.like_id) DESC", new FilmIdMapper(), directorId);
-        if (filmIdList.size() == 0) {
-            return getFilmListForDirector(directorId, comparator);
-        }
+
         for (Integer id : filmIdList) {
-            sortDirectorFilmListByLike.add(findFilmById(id));
+            films.add(findFilmById(id));
         }
-        return sortDirectorFilmListByLike;
+        return films;
     }
 
     public Collection<Film> getDirectorFilmSortedByYear(Integer directorId) {
-        Comparator<Film> comparator = Comparator.comparing(Film::getReleaseDate)
-                .thenComparing(Film::getId);
-        return getFilmListForDirector(directorId, comparator);
-    }
+        Collection<Film> films = new ArrayList<>();
+        Collection<Integer> filmIdList = jdbcTemplate.query("SELECT FILM_DIRECTORS.film_id\n" +
+                "FROM DIRECTORS\n" +
+                "INNER JOIN FILM_DIRECTORS on DIRECTORS.director_id = FILM_DIRECTORS.director_id\n" +
+                "INNER JOIN FILMS_MODEL ON FILM_DIRECTORS.film_id = FILMS_MODEL.FILM_ID\n" +
+                "WHERE DIRECTORS.director_id = ?\n" +
+                "GROUP BY FILM_DIRECTORS.film_id\n" +
+                "ORDER BY FILMS_MODEL.RELEASE_DATE", new FilmIdMapper(), directorId);
 
-    private Collection<Film> getFilmListForDirector(Integer directorId, Comparator<Film> comparator) {
-        Collection<Integer> filmIdList = jdbcTemplate.query("SELECT * FROM FILM_DIRECTORS " +
-                "WHERE DIRECTOR_ID = ?", new FilmIdMapper(), directorId);
-        Collection<Film> directorFilmList = new ArrayList<>();
         for (Integer id : filmIdList) {
-            directorFilmList.add(findFilmById(id));
+            films.add(findFilmById(id));
         }
-        Collection<Film> sortedFilmList = new TreeSet<>(comparator);
-        sortedFilmList.addAll(directorFilmList);
-        return sortedFilmList;
+        return films;
     }
 
     @Override

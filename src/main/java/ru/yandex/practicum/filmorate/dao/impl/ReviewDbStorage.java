@@ -8,18 +8,12 @@ import ru.yandex.practicum.filmorate.mappers.ReviewMapper;
 import ru.yandex.practicum.filmorate.model.Review;
 
 import java.util.Collection;
-import java.util.Comparator;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 @Repository("reviewDbStorage")
 public class ReviewDbStorage implements ReviewStorage {
 
     private final JdbcTemplate jdbcTemplate;
-
-    Comparator<Review> comparator = Comparator.comparing(Review::getUseful).reversed()
-            .thenComparing(Review::getReviewId);
 
     public ReviewDbStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -29,7 +23,7 @@ public class ReviewDbStorage implements ReviewStorage {
     public Review createReview(Review review) {
         jdbcTemplate.update("INSERT INTO REVIEWS (USER_ID, FILM_ID, IS_POSITIVE, CONTENT, USEFUL) " +
                         "VALUES (?, ?, ?, ?, ?)", review.getUserId(), review.getFilmId()
-                , review.isPositive(), review.getContent(), review.getUseful());
+                , review.isPositive(), review.getContent(), 0);
 
         return getReviewById(review.getReviewId());
     }
@@ -56,22 +50,17 @@ public class ReviewDbStorage implements ReviewStorage {
 
     @Override
     public Collection<Review> getAllReviewByFilmId(int filmId, int count) {
-        Collection<Review> reviews = jdbcTemplate.query("SELECT * FROM REVIEWS WHERE FILM_ID = ?"
+        Collection<Review> reviews = jdbcTemplate.query("SELECT * FROM REVIEWS WHERE FILM_ID = ? " +
+                        "ORDER BY USEFUL DESC"
                 , new ReviewMapper(), filmId);
 
-        Set<Review> reviewForFilm = new TreeSet<>(comparator);
-        reviewForFilm.addAll(reviews);
-
-        return reviewForFilm.stream().limit(count).collect(Collectors.toList());
+        return reviews.stream().limit(count).collect(Collectors.toList());
     }
 
     @Override
     public Collection<Review> getAllReview() {
-        Collection<Review> reviews = jdbcTemplate.query("SELECT * FROM REVIEWS", new ReviewMapper());
-        Set<Review> popularReview = new TreeSet<>(comparator);
-        popularReview.addAll(reviews);
-
-        return popularReview;
+        return jdbcTemplate.query("SELECT * FROM REVIEWS ORDER BY USEFUL DESC"
+                , new ReviewMapper());
     }
 
     @Override
@@ -120,9 +109,4 @@ public class ReviewDbStorage implements ReviewStorage {
         return likeRows.next();
     }
 
-    public boolean checkContainsDislikeInReview(Integer reviewId, Integer userId) {
-        SqlRowSet likeRows = jdbcTemplate.queryForRowSet("SELECT * FROM REVIEW_LIKES " +
-                "WHERE REVIEW_ID = ? AND GRADE = ? AND USER_ID = ?", reviewId, "dislike", userId);
-        return likeRows.next();
-    }
 }
