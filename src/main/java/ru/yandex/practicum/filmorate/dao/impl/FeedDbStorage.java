@@ -13,9 +13,6 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @Repository("FeedDbStorage")
 public class FeedDbStorage implements FeedStorage {
@@ -37,13 +34,13 @@ public class FeedDbStorage implements FeedStorage {
     @Override
     public int addFeedEvent(Feed feed) {
         String sqlQuery = "INSERT INTO FEED_MODEL(TIMESTAMP, USER_ID, EVENT_TYPE, OPERATION_TYPE, ENTITY_ID) " +
-                          "SELECT ?, ?, ED.EVENT_ID, OD.OPERATION_ID, ? " +
-                          "FROM EVENT_DICTIONARY ED " +
-                          "JOIN OPERATION_DICTIONARY OD " +
-                          "WHERE ED.EVENT_NAME = ? " +
-                          "AND OD.OPERATION_NAME = ?";
+                "SELECT ?, ?, ED.EVENT_ID, OD.OPERATION_ID, ? " +
+                "FROM EVENT_DICTIONARY ED " +
+                "JOIN OPERATION_DICTIONARY OD " +
+                "WHERE ED.EVENT_NAME = ? " +
+                "AND OD.OPERATION_NAME = ?";
 
-        if(feed.getEventType().equals(EventType.REVIEW) && feed.getOperation().equals(OperationType.REMOVE)) {
+        if (feed.getEventType().equals(EventType.REVIEW) && feed.getOperation().equals(OperationType.REMOVE)) {
             getUserIdForDeleteReviewEvent(feed);
         }
 
@@ -58,10 +55,10 @@ public class FeedDbStorage implements FeedStorage {
     private Feed makeFeed(ResultSet rs, int rowNum) throws SQLException {
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet(
                 "SELECT " +
-                "ED.EVENT_NAME, OD.OPERATION_NAME " +
-                "FROM EVENT_DICTIONARY ED " +
-                "JOIN OPERATION_DICTIONARY OD " +
-                "ON ED.EVENT_ID = ? AND OD.OPERATION_ID = ?", rs.getInt("EVENT_TYPE"), rs.getInt("OPERATION_TYPE"));
+                        "ED.EVENT_NAME, OD.OPERATION_NAME " +
+                        "FROM EVENT_DICTIONARY ED " +
+                        "JOIN OPERATION_DICTIONARY OD " +
+                        "ON ED.EVENT_ID = ? AND OD.OPERATION_ID = ?", rs.getInt("EVENT_TYPE"), rs.getInt("OPERATION_TYPE"));
         rowSet.next();
         return Feed.builder()
                 .eventId(rs.getLong("EVENT_ID"))

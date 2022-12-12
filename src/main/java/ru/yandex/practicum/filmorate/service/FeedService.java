@@ -19,8 +19,8 @@ public class FeedService {
         this.feedStorage = feedStorage;
     }
 
-    public List<Feed> getFeedByUserId(int userId){
-        log.info(String.format("Запрошена лента новостей для пользователя %d",userId));
+    public List<Feed> getFeedByUserId(int userId) {
+        log.info(String.format("Запрошена лента новостей для пользователя %d", userId));
         return feedStorage.getFeedByUserId(userId);
     }
 }

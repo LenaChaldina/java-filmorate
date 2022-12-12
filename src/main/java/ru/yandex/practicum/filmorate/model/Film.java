@@ -15,7 +15,10 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -35,6 +38,7 @@ public class Film {
     Mpa mpa;
     SortedSet<Genre> genres = new TreeSet<>(Comparator.comparingInt(Genre::getId));
     List<Director> directors;
+
     public Film(String name, String description, LocalDate releaseDate, Long duration, Mpa mpa) {
         this.name = name;
         this.description = description;

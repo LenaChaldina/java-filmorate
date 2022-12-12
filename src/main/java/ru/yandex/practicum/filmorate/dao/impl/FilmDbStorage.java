@@ -5,13 +5,16 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.dao.FilmStorage;
 import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
-import ru.yandex.practicum.filmorate.mappers.*;
+import ru.yandex.practicum.filmorate.mappers.FilmIdMapper;
+import ru.yandex.practicum.filmorate.mappers.FilmMapper;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 @Repository("FilmDbStorage")
 public class FilmDbStorage implements FilmStorage {
@@ -47,8 +50,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> getPopularFilmsWithFilter(int limit, int genreId, int year) {
-
-        SqlRowSet filmRows = jdbcTemplate.queryForRowSet("select FM.FILM_ID, FM.TITLE, FM.DESCRIPTION, FM.release_date,FM.DURATION, FM.MPA_ID, MD.RATING,\n" +
+        List<Film> filmRows = jdbcTemplate.query("select FM.FILM_ID, FM.TITLE, FM.DESCRIPTION, FM.release_date,FM.DURATION, FM.MPA_ID, MD.RATING,\n" +
                 "       TRIM(BOTH ']' from TRIM(BOTH '[' FROM ARRAY_AGG(GD.GENRE_ID))) as GENRE_ID ,\n" +
                 "       TRIM(BOTH ']' from TRIM(BOTH '[' FROM TRIM(BOTH '}' from TRIM(BOTH '{' FROM ARRAY_AGG(GD.GENRE_NAME))))) as GENRE_N\n" +
                 "from FILMS_MODEL FM\n" +
@@ -58,36 +60,11 @@ public class FilmDbStorage implements FilmStorage {
                 "                LEFT JOIN GENRE_DICTIONARY GD on FILMS_GENRES.GENRE_ID = GD.GENRE_ID\n" +
                 "                WHERE (films_genres.genre_id = ? OR 0 = ?)\n" +
                 "                and (EXTRACT(YEAR from FM.release_date) = ? or 0 = ?)\n" +
-                "                GROUP by FM.film_id\n" +
+                "                GROUP by FM.film_id, FM.TITLE, FM.DESCRIPTION, FM.release_date,FM.DURATION, FM.MPA_ID, MD.RATING\n" +
                 "                ORDER by COUNT(films_likes.like_id) DESC, FM.film_id\n" +
-                "                LIMIT ?;", genreId, genreId, year, year, limit);
+                "                LIMIT ?;", new FilmMapper(), genreId, genreId, year, year, limit);
 
-        return getListFilms(filmRows);
-    }
-
-    private List<Film> getListFilms(SqlRowSet filmRows) {
-        List<Film> films = new ArrayList<>();
-        while (filmRows.next()) {
-            SortedSet<Genre> genres = new TreeSet<>(Comparator.comparingInt(Genre::getId));
-            String ids = filmRows.getString("GENRE_ID");
-            if (!ids.equals("null")) {
-                int[] genreIds = Arrays.stream(ids.split(", ")).mapToInt(Integer::parseInt).toArray();
-                String[] genreNames = filmRows.getString("GENRE_N").split(", ");
-                for (int i = 0; i < genreIds.length; i++) {
-                    genres.add(new Genre(genreIds[i], genreNames[i]));
-                }
-            }
-            Film film = new Film(
-                    filmRows.getString("title"),
-                    filmRows.getString("description"),
-                    filmRows.getDate("release_date").toLocalDate(),
-                    filmRows.getLong("duration"),
-                    new Mpa(filmRows.getInt("mpa_id"), filmRows.getString("RATING")));
-            film.setId(filmRows.getInt("film_id"));
-            film.setGenres(genres);
-            films.add(film);
-        }
-        return films;
+        return filmRows;
     }
 
     @Override
@@ -104,26 +81,6 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-  /*  public Film findFilmById(int id) {
-        if (checkFilmIdExists(id)) {
-            throw new EntityNotFoundException("Фильм с id " + id + " не найден.");
-        }
-        Film film = jdbcTemplate.queryForObject("SELECT * FROM films_model WHERE FILM_ID = ?"
-                , new FilmMapper(), id);
-        Mpa mpa = jdbcTemplate.queryForObject("select mpa_dictionary.mpa_id, mpa_dictionary.rating from mpa_dictionary where mpa_id =?", new MpaMapper(), film.getMpa().getId());
-        film.setMpa(mpa);
-        List<Genre> genres = jdbcTemplate.query("SELECT G2.* FROM films_genres G1 inner JOIN genre_dictionary G2 on G2.genre_id = g1.genre_id WHERE g1.film_id=?;"
-                , new GenreMapper(), id);
-        List<Director> directorList = jdbcTemplate.query("SELECT F.DIRECTOR_ID, D.NAME " +
-                        "FROM FILM_DIRECTORS F LEFT JOIN DIRECTORS D on D.DIRECTOR_ID = F.DIRECTOR_ID WHERE FILM_ID = ?"
-                , new DirectorMapper(), id);
-        SortedSet<Genre> genresSet = new TreeSet<>(Comparator.comparingInt(Genre::getId));
-
-        genresSet.addAll(genres);
-        film.setGenres(genresSet);
-        film.setDirectors(directorList);
-        return film;
-    }*/
     public Film findFilmById(int id) {
         if (checkFilmIdExists(id)) {
             throw new EntityNotFoundException("Фильм с id " + id + " не найден.");

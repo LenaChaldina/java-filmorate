@@ -108,5 +108,4 @@ public class ReviewDbStorage implements ReviewStorage {
                 "WHERE REVIEW_ID = ? AND GRADE = ? AND USER_ID = ?", reviewId, "like", userId);
         return likeRows.next();
     }
-
 }

@@ -10,6 +10,7 @@ import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.ArrayList;
 import java.util.List;
+
 @Slf4j
 @Repository("FriendDbStorage")
 public class FriendDbStorage implements FriendStorage {

@@ -14,9 +14,8 @@ import java.util.Objects;
 @Getter
 @Setter
 @Builder
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal=true)
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class Feed {
-
     private Long eventId;
     private Long timestamp;
     @NotNull

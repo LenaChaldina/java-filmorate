@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.mappers;
 
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
@@ -14,7 +13,6 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 public class FilmMapper implements RowMapper<Film> {
-
     @Override
     public Film mapRow(ResultSet rowSet, int rowNum) throws SQLException {
         //Добавила жанры в маппеер, чтобы получать готовый фильм одним запросом из базы

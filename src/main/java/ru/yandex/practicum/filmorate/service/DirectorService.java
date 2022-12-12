@@ -34,7 +34,7 @@ public class DirectorService implements DirectorStorage {
     @Override
     public Director updateDirector(Director director) {
         Director updateDirector = directorDbStorage.updateDirector(director);
-           if(updateDirector != null) {
+        if (updateDirector != null) {
             log.info("Информация о режиссере обновлена {}", director.getName());
             return updateDirector;
         }
