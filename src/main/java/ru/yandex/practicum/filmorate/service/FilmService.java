@@ -52,13 +52,31 @@ public class FilmService {
 
     public void putLike(int id, int userId) {
         likeStorage.addLike(id, userId);
-        feedStorage.addFeedEvent(Feed.builder().userId(userId).entityId(id).eventType(EventType.LIKE).operation(OperationType.ADD).build());
+        if(feedStorage.addFeedEvent(Feed.builder().userId(userId).entityId(id).eventType(EventType.LIKE).operation(OperationType.ADD).build()) != 1) {
+            log.warn("Ошибка добавления события userId = {}, entityId = {}, eventType = {}, operation = {} в ленту!",
+                    userId,
+                    id,
+                    EventType.LIKE,
+                    OperationType.ADD);
+            throw new RequestError( HttpStatus.INTERNAL_SERVER_ERROR,"Событие не добавлено в ленту!");
+        } else {
+            log.info("Добавлено событие в ленту!");
+        }
     }
 
     public void deleteLike(int id, int userId) {
         likeStorage.checkFilmId(id);
         likeStorage.checkUserId(userId);
-        feedStorage.addFeedEvent(Feed.builder().userId(userId).entityId(id).eventType(EventType.LIKE).operation(OperationType.REMOVE).build());
+        if(feedStorage.addFeedEvent(Feed.builder().userId(userId).entityId(id).eventType(EventType.LIKE).operation(OperationType.REMOVE).build()) != 1) {
+            log.warn("Ошибка добавления события userId = {}, entityId = {}, eventType = {}, operation = {} в ленту!",
+                    userId,
+                    id,
+                    EventType.LIKE,
+                    OperationType.REMOVE);
+            throw new RequestError( HttpStatus.INTERNAL_SERVER_ERROR,"Событие не добавлено в ленту!");
+        } else {
+            log.info("Добавлено событие в ленту!");
+        }
         likeStorage.deleteLike(id, userId);
     }
 

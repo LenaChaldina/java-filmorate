@@ -7,5 +7,5 @@ import java.util.List;
 public interface FeedStorage {
     List<Feed> getFeedByUserId(int userId);
 
-    void addFeedEvent(Feed build);
+    int addFeedEvent(Feed build);
 }
