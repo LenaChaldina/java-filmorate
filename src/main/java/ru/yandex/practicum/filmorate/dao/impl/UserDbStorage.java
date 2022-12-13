@@ -56,7 +56,8 @@ public class UserDbStorage implements UserStorage {
         List<Film> filmRows = jdbcTemplate.query(
                 "select FM.FILM_ID, FM.TITLE, FM.DESCRIPTION, FM.release_date,FM.DURATION, FM.MPA_ID, MD.RATING,\n" +
                         "       TRIM(BOTH ']' from TRIM(BOTH '[' FROM ARRAY_AGG(GD.GENRE_ID))) as GENRE_ID ,\n" +
-                        "       TRIM(BOTH ']' from TRIM(BOTH '[' FROM TRIM(BOTH '}' from TRIM(BOTH '{' FROM ARRAY_AGG(GD.GENRE_NAME))))) as GENRE_N\n" +
+                        "       TRIM(BOTH ']' from TRIM(BOTH '[' FROM TRIM(BOTH '}' from TRIM(BOTH '{' FROM ARRAY_AGG(GD.GENRE_NAME))))) as GENRE_N, " +
+                        "'null' as DIRECTOR_ID, 'null' as DIRECTOR_N \n" +
                         "from films_likes\n" +
                         "                        inner join films_model FM on films_likes.film_id = FM.film_id\n" +
                         "                        inner join MPA_DICTIONARY MD on FM.MPA_ID = MD.MPA_ID\n" +
