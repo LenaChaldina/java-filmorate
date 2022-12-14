@@ -18,8 +18,15 @@ public class FeedService {
         this.feedStorage = feedStorage;
     }
 
-    public List<Feed> getFeedByUserId(int userId){
-        log.info(String.format("Запрошена лента новостей для пользователя %d",userId));
-        return feedStorage.getFeedByUserId(userId);
+    public List<Feed> getFeedByUserId(int userId) {
+        log.info(String.format("Запрошена лента новостей для пользователя %d", userId));
+        List<Feed> result = feedStorage.getFeedByUserId(userId);
+        if (result == null) {
+            log.info("Лента новостей по пользователю {} - пустая.", userId);
+            return List.of();
+        } else {
+            log.info("Выгружена непустая лента новостей по пользователю {}.", userId);
+            return result;
+        }
     }
 }
