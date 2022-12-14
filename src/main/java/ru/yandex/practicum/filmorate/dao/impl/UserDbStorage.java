@@ -25,7 +25,7 @@ public class UserDbStorage implements UserStorage {
                         " VALUES (?, ?, ?, ?) ", user.getEmail(), user.getLogin(), user.getName()
                 , user.getBirthday());
 
-        return findUserById(user.getId());
+        return user;
     }
 
     @Override
@@ -33,7 +33,7 @@ public class UserDbStorage implements UserStorage {
         jdbcTemplate.update("UPDATE USERS_MODEL SET EMAIL=?, LOGIN=?, NAME=?, BIRTHDAY=? WHERE USER_ID=?",
                 user.getEmail(), user.getLogin(), user.getName(), user.getBirthday(), user.getId());
 
-        return findUserById(user.getId());
+        return user;
     }
 
     @Override

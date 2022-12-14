@@ -129,7 +129,7 @@ public class FilmService {
 
     private boolean checkContainsDirectorInList(Integer id) {
         for (Director director : directorStorage.getAllDirectors()) {
-            if (director.getId().equals(id)) return true;
+            if (director.getId().equals(id) && director != null) return true;
         }
         return false;
     }

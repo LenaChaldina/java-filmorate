@@ -23,17 +23,17 @@ public class DirectorDbStorage implements DirectorStorage {
         jdbcTemplate.update("INSERT INTO DIRECTORS (DIRECTOR_ID, NAME) VALUES ( ?, ? )"
                 , director.getId(), director.getName());
 
-        return getDirectorById(director.getId());
+        return director;
     }
 
     @Override
     public Director updateDirector(Director director) {
         Integer rowCount = jdbcTemplate.update("UPDATE DIRECTORS SET NAME = ? WHERE DIRECTOR_ID = ?"
                 , director.getName(), director.getId());
-        if(rowCount < 1) {
+        if (rowCount < 1) {
             return null;
         } else {
-            return getDirectorById(director.getId());
+            return director;
         }
     }
 
@@ -52,7 +52,7 @@ public class DirectorDbStorage implements DirectorStorage {
     public void deleteDirectorById(Integer id) {
         Integer dirCount = jdbcTemplate.update("DELETE FROM FILM_DIRECTORS WHERE DIRECTOR_ID = ?", id);
         Integer dirFilmCount = jdbcTemplate.update("DELETE FROM DIRECTORS WHERE DIRECTOR_ID = ?", id);
-        if((dirCount < 1) || (dirFilmCount < 1))  {
+        if ((dirCount < 1) || (dirFilmCount < 1)) {
             throw new EntityNotFoundException("Такого режиссера нет");
         }
     }

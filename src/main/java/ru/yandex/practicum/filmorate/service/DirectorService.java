@@ -16,8 +16,8 @@ import java.util.Objects;
 @Slf4j
 public class DirectorService implements DirectorStorage {
 
-    Integer id = 1;
-    final DirectorDbStorage directorDbStorage;
+    private Integer id = 1;
+    private final DirectorDbStorage directorDbStorage;
 
     public DirectorService(@Qualifier("directorDbStorage") DirectorDbStorage directorDbStorage) {
         this.directorDbStorage = directorDbStorage;
@@ -34,13 +34,13 @@ public class DirectorService implements DirectorStorage {
     @Override
     public Director updateDirector(Director director) {
         Director updateDirector = directorDbStorage.updateDirector(director);
-        if (updateDirector != null) {
-            log.info("Информация о режиссере обновлена {}", director.getName());
-            return updateDirector;
+        if (updateDirector == null) {
+            log.warn("Ошибка. Режиссер не найден в списке");
+            throw new RequestError(HttpStatus.NOT_FOUND
+                    , "Ошибка. Невозможно обновить несуществующий фильм");
         }
-        log.warn("Ошибка. Режиссер не найден в списке");
-        throw new RequestError(HttpStatus.NOT_FOUND
-                , "Ошибка. Невозможно обновить несуществующий фильм");
+        log.info("Информация о режиссере обновлена {}", director.getName());
+        return updateDirector;
     }
 
     @Override
@@ -66,7 +66,7 @@ public class DirectorService implements DirectorStorage {
 
     private boolean checkContainsDirectorInList(Integer id) {
         for (Director director : directorDbStorage.getAllDirectors()) {
-            if (Objects.equals(director.getId(), id)) return true;
+            if (Objects.equals(director.getId(), id) && director != null) return true;
         }
         return false;
     }

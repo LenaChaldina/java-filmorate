@@ -78,8 +78,7 @@ public class FilmDbStorage implements FilmStorage {
         removeFilmGenres(film.getId());
         addFilmGenres(film);
         addDirectorForFilm(film);
-        Film film1 = findFilmById(film.getId());
-        return film1;
+        return film;
     }
 
     @Override
@@ -87,16 +86,26 @@ public class FilmDbStorage implements FilmStorage {
         if (checkFilmIdExists(id)) {
             throw new EntityNotFoundException("Фильм с id " + id + " не найден.");
         }
-        Film film = jdbcTemplate.queryForObject("select FM.FILM_ID,\n" + "FM.TITLE,\n" + "FM.DESCRIPTION,\n" +
-                        "FM.release_date,\n" + "FM.DURATION,\n" + "FM.MPA_ID,\n" + "MD.RATING,\n" + "\n" +
-                        "TRIM(BOTH ']' from TRIM(BOTH '[' FROM ARRAY_AGG(GD.GENRE_ID)))                             as GENRE_ID,\n" +
-                        "TRIM(BOTH ']' from TRIM(BOTH '[' FROM\n" + "TRIM(BOTH '}' from TRIM(BOTH '{' FROM ARRAY_AGG(GD.GENRE_NAME))))) as GENRE_N,\n" + "\n" +
-                        "TRIM(BOTH ']' from TRIM(BOTH '[' FROM ARRAY_AGG(FD.DIRECTOR_ID)))                          as DIRECTOR_ID,\n" +
-                        "TRIM(BOTH ']' from TRIM(BOTH '[' FROM\n" + "                               TRIM(BOTH '}' from TRIM(BOTH '{' FROM ARRAY_AGG(D.NAME))))) as DIRECTOR_N\n" + "from FILMS_MODEL FM\n" + "inner join MPA_DICTIONARY MD\n" +
-                        "                    on FM.MPA_ID = MD.MPA_ID\n" + "left join FILMS_GENRES FG\n" +
-                        "                   on FM.FILM_ID = FG.FILM_ID\n" + "left join GENRE_DICTIONARY GD on FG.GENRE_ID = GD.GENRE_ID\n" +
-                        "left join FILM_DIRECTORS FD on FM.FILM_ID = FD.FILM_ID\n" + "left join DIRECTORS D on D.DIRECTOR_ID = FD.DIRECTOR_ID\n" +
-                        "group by FM.FILM_ID, FM.TITLE, FM.MPA_ID, MD.RATING\n" + "having FM.FILM_ID = ?;"
+        Film film = jdbcTemplate.queryForObject(
+                "select FM.FILM_ID,\n" +
+                        "FM.TITLE,\n" +
+                        "FM.DESCRIPTION,\n" +
+                        "FM.release_date,\n" +
+                        "FM.DURATION,\n" +
+                        "FM.MPA_ID,\n" +
+                        "MD.RATING,\n" + "\n" +
+                        "TRIM(BOTH ']' from TRIM(BOTH '[' FROM ARRAY_AGG(GD.GENRE_ID))) as GENRE_ID,\n" +
+                        "TRIM(BOTH ']' from TRIM(BOTH '[' FROM TRIM(BOTH '}' from TRIM(BOTH '{' FROM ARRAY_AGG(GD.GENRE_NAME))))) as GENRE_N,\n" +
+                        "TRIM(BOTH ']' from TRIM(BOTH '[' FROM ARRAY_AGG(FD.DIRECTOR_ID))) as DIRECTOR_ID,\n" +
+                        "TRIM(BOTH ']' from TRIM(BOTH '[' FROM TRIM(BOTH '}' from TRIM(BOTH '{' FROM ARRAY_AGG(D.NAME))))) as DIRECTOR_N\n" +
+                        "from FILMS_MODEL FM\n" +
+                        "inner join MPA_DICTIONARY MD on FM.MPA_ID = MD.MPA_ID\n" +
+                        "left join FILMS_GENRES FG on FM.FILM_ID = FG.FILM_ID\n" +
+                        "left join GENRE_DICTIONARY GD on FG.GENRE_ID = GD.GENRE_ID\n" +
+                        "left join FILM_DIRECTORS FD on FM.FILM_ID = FD.FILM_ID\n" +
+                        "left join DIRECTORS D on D.DIRECTOR_ID = FD.DIRECTOR_ID\n" +
+                        "group by FM.FILM_ID, FM.TITLE, FM.MPA_ID, MD.RATING\n" +
+                        "having FM.FILM_ID = ?;"
                 , new FilmMapper(), id);
         return film;
     }
@@ -136,11 +145,6 @@ public class FilmDbStorage implements FilmStorage {
     public SqlRowSet getSqlRowSetByFilmId(Integer id) {
         String sqlQuery = "SELECT * FROM films_model WHERE film_id = ?";
         return jdbcTemplate.queryForRowSet(sqlQuery, id);
-    }
-
-    private Genre getGenreFromRow(SqlRowSet genreRow) {
-        return new Genre(genreRow.getInt("genre_id"),
-                genreRow.getString("genre_name"));
     }
 
     private void addFilmGenres(Film film) {
