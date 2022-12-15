@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.dao.impl;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.FilmStorage;
 import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
@@ -31,7 +32,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         return film;
     }
 
-    public List<Film> getFilms() {
+    public List<Film> getListFilms() {
         return new ArrayList<>(films.values());
     }
 
@@ -42,15 +43,49 @@ public class InMemoryFilmStorage implements FilmStorage {
             throw new EntityNotFoundException("Такого фильма нет");
         }
     }
-    public List<Film> getPopularFilms(int count) {
-        return null;
-    }
 
     @Override
     public void deleteFilm(int id) {
 
     }
 
-    public static class MpaDbStorage {
+    @Override
+    public List<Film> getPopularFilmsWithFilter(int limit, int genreId, int year) {
+        return null;
+    }
+
+    @Override
+    public Collection<Film> getDirectorFilmSortedByLike(Integer directorId) {
+        return null;
+    }
+
+    @Override
+    public Collection<Film> getDirectorFilmSortedByYear(Integer directorId) {
+        return null;
+    }
+
+    @Override
+    public boolean checkFilmIdExists(int id) {
+        return false;
+    }
+
+    @Override
+    public List<Film> searchFilm(String query, List<String> searchBy) {
+        return null;
+    }
+
+    @Override
+    public List<Film> getCommonFilms(Integer userId, Integer friendId) {
+        return null;
+    }
+
+    @Override
+    public SqlRowSet getSqlRowSetByFilmId(Integer id) {
+        return null;
+    }
+
+    @Override
+    public SqlRowSet getFilmsSqlRowSet(int id) {
+        return null;
     }
 }

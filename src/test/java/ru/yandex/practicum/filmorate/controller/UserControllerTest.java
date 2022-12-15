@@ -12,7 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.сontroller.UserController;
+import ru.yandex.practicum.filmorate.controller.UserController;
 import com.google.gson.Gson;
 
 import java.time.LocalDate;
