@@ -6,6 +6,7 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.dao.FriendStorage;
 import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
+import ru.yandex.practicum.filmorate.mappers.UserMapper;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.ArrayList;
@@ -41,6 +42,17 @@ public class FriendDbStorage implements FriendStorage {
         List<User> usersFromDb = getUsersFromDb(userRows);
         return usersFromDb;
 
+    }
+
+    public Boolean getFriendForUser(Integer userId, Integer friendId) {
+        List<User> userList = jdbcTemplate.
+                query("select m.* from users_friends f inner join users_model m on f.user_friend_id = m.user_id " +
+                                "where f.user_id = ? and f.friends_id = ?"
+                        , new UserMapper(), userId, friendId);
+        if (userList.size() == 0) {
+            return true;
+        }
+        return false;
     }
 
     public List<User> getCommonFriends(int userId, int otherId) {

@@ -111,7 +111,7 @@ public class FilmService {
     }
 
     public Collection<Film> getDirectorFilmSortedByLike(Integer directorId) {
-        if (checkContainsDirectorInList(directorId)) {
+        if (directorStorage.getDirectorById(directorId) != null) {
             return filmStorage.getDirectorFilmSortedByLike(directorId);
         }
         log.warn("Ошибка. Режиссера с id {} нет в списке", directorId);
@@ -119,20 +119,13 @@ public class FilmService {
     }
 
     public Collection<Film> getDirectorFilmSortedByYear(Integer directorId) {
-        if (checkContainsDirectorInList(directorId)) {
+        if (directorStorage.getDirectorById(directorId) != null) {
             return filmStorage.getDirectorFilmSortedByYear(directorId);
         }
         log.warn("Ошибка. Режиссера с id {} нет в списке", directorId);
         throw new RequestError(HttpStatus.NOT_FOUND, "Режиссер на найден в списке");
     }
 
-
-    private boolean checkContainsDirectorInList(Integer id) {
-        for (Director director : directorStorage.getAllDirectors()) {
-            if (director.getId().equals(id) && director != null) return true;
-        }
-        return false;
-    }
 
     public List<Film> searchFilm(String query, List<String> searchBy) {
         return filmStorage.searchFilm(query, searchBy);

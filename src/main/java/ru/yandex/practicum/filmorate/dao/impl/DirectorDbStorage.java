@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.mappers.DirectorMapper;
 import ru.yandex.practicum.filmorate.model.Director;
 
 import java.util.Collection;
+import java.util.List;
 
 @Component("directorDbStorage")
 public class DirectorDbStorage implements DirectorStorage {
@@ -44,8 +45,12 @@ public class DirectorDbStorage implements DirectorStorage {
 
     @Override
     public Director getDirectorById(Integer id) {
-        return jdbcTemplate.queryForObject("SELECT * FROM DIRECTORS WHERE DIRECTOR_ID = ?"
+        List<Director> directorList = jdbcTemplate.query("SELECT * FROM DIRECTORS WHERE DIRECTOR_ID = ?"
                 , new DirectorMapper(), id);
+        if(directorList.size() == 0) {
+            return null;
+        }
+        return directorList.get(0);
     }
 
     @Override

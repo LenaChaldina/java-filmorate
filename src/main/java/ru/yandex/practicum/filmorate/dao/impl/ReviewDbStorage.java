@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.mappers.ReviewMapper;
 import ru.yandex.practicum.filmorate.model.Review;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Repository("reviewDbStorage")
@@ -44,8 +45,12 @@ public class ReviewDbStorage implements ReviewStorage {
 
     @Override
     public Review getReviewById(int reviewId) {
-        return jdbcTemplate.queryForObject("SELECT * FROM REVIEWS WHERE REVIEW_ID = ?"
+        List<Review> reviewList = jdbcTemplate.query("SELECT * FROM REVIEWS WHERE REVIEW_ID = ?"
                 , new ReviewMapper(), reviewId);
+        if(reviewList.size() == 0) {
+            return null;
+        }
+        return reviewList.get(0);
     }
 
     @Override
