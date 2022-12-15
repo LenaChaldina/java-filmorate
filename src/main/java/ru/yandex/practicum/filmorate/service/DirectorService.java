@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.dao.DirectorStorage;
 import ru.yandex.practicum.filmorate.dao.impl.DirectorDbStorage;
 import ru.yandex.practicum.filmorate.exceptions.RequestError;
 import ru.yandex.practicum.filmorate.model.Director;
@@ -14,7 +13,7 @@ import java.util.Objects;
 
 @Service
 @Slf4j
-public class DirectorService implements DirectorStorage {
+public class DirectorService {
 
     private Integer id = 1;
     private final DirectorDbStorage directorDbStorage;
@@ -23,7 +22,7 @@ public class DirectorService implements DirectorStorage {
         this.directorDbStorage = directorDbStorage;
     }
 
-    @Override
+
     public Director createDirector(Director director) {
         director.setId(id);
         id++;
@@ -31,7 +30,6 @@ public class DirectorService implements DirectorStorage {
         return directorDbStorage.createDirector(director);
     }
 
-    @Override
     public Director updateDirector(Director director) {
         Director updateDirector = directorDbStorage.updateDirector(director);
         if (updateDirector == null) {
@@ -43,12 +41,10 @@ public class DirectorService implements DirectorStorage {
         return updateDirector;
     }
 
-    @Override
     public Collection<Director> getAllDirectors() {
         return directorDbStorage.getAllDirectors();
     }
 
-    @Override
     public Director getDirectorById(Integer id) {
         if (checkContainsDirectorInList(id)) {
             log.info("Получен запрос информации о режиссере {}", id);
@@ -58,7 +54,6 @@ public class DirectorService implements DirectorStorage {
         throw new RequestError(HttpStatus.NOT_FOUND, "Режиссер не найден");
     }
 
-    @Override
     public void deleteDirectorById(Integer id) {
         log.info("Режиссер с id = {} удален из списка", id);
         directorDbStorage.deleteDirectorById(id);

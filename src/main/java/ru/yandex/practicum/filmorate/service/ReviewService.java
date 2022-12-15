@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.FeedStorage;
-import ru.yandex.practicum.filmorate.dao.ReviewStorage;
 import ru.yandex.practicum.filmorate.dao.impl.FilmDbStorage;
 import ru.yandex.practicum.filmorate.dao.impl.ReviewDbStorage;
 import ru.yandex.practicum.filmorate.enums.EventType;
@@ -19,7 +18,7 @@ import java.util.Collection;
 
 @Service
 @Slf4j
-public class ReviewService implements ReviewStorage {
+public class ReviewService {
     private int id = 1;
     private final ReviewDbStorage reviewDbStorage;
     private final FilmDbStorage filmDbStorage;
@@ -34,7 +33,6 @@ public class ReviewService implements ReviewStorage {
         this.feedStorage = feedStorage;
     }
 
-    @Override
     public Review createReview(Review review) {
         if (review.isPositive() == null) {
             log.warn("Отзыв не создан. Не указан тип отзыва");
@@ -69,7 +67,6 @@ public class ReviewService implements ReviewStorage {
         return newReview;
     }
 
-    @Override
     public Review updateReview(Review review) {
         if (checkContainsReview(review.getReviewId())) {
             log.warn("Отзыв не обновлен, отзыва с id {} не найдено", review.getReviewId());
@@ -90,7 +87,6 @@ public class ReviewService implements ReviewStorage {
         return updatedReview;
     }
 
-    @Override
     public void deleteReview(int reviewId) {
         if (checkContainsReview(reviewId)) {
             log.warn("Отзыв не удален, отзыва с id {} не найдено", reviewId);
@@ -109,7 +105,6 @@ public class ReviewService implements ReviewStorage {
         reviewDbStorage.deleteReview(reviewId);
     }
 
-    @Override
     public Review getReviewById(int reviewId) {
         if (checkContainsReview(reviewId)) {
             log.warn("Не возможно отобразить отзыв, отзыва с id {} не найдено", reviewId);
@@ -119,7 +114,6 @@ public class ReviewService implements ReviewStorage {
         return reviewDbStorage.getReviewById(reviewId);
     }
 
-    @Override
     public Collection<Review> getAllReviewByFilmId(int filmId, int count) {
         if (filmDbStorage.checkFilmIdExists(filmId)) {
             log.warn("Отзыв не создан, фильм с id {} не найден", filmId);
@@ -128,12 +122,10 @@ public class ReviewService implements ReviewStorage {
         return reviewDbStorage.getAllReviewByFilmId(filmId, count);
     }
 
-    @Override
     public Collection<Review> getAllReview() {
         return reviewDbStorage.getAllReview();
     }
 
-    @Override
     public void addLikeForReview(int reviewId, int userId) {
         if (checkContainsReview(reviewId)) {
             log.warn("Невозможно добавить лайк отзыву, отзыва с id {} не найдено", reviewId);
@@ -151,7 +143,6 @@ public class ReviewService implements ReviewStorage {
         reviewDbStorage.addLikeForReview(reviewId, userId);
     }
 
-    @Override
     public void addDislikeForReview(int reviewId, int userId) {
         if (checkContainsReview(reviewId)) {
             log.warn("Невозможно добавить дизлайк отзыву, отзыва с id {} не найдено", reviewId);
@@ -169,7 +160,6 @@ public class ReviewService implements ReviewStorage {
         reviewDbStorage.addDislikeForReview(reviewId, userId);
     }
 
-    @Override
     public void deleteLikeForReview(int reviewId, int userId) {
         if (checkContainsReview(reviewId)) {
             log.warn("Невозможно удалить лайк отзыву, отзыва с id {} не найдено", reviewId);
@@ -187,7 +177,6 @@ public class ReviewService implements ReviewStorage {
         reviewDbStorage.deleteLikeForReview(reviewId, userId);
     }
 
-    @Override
     public void deleteDislikeForReview(int reviewId, int userId) {
         if (checkContainsReview(reviewId)) {
             log.warn("Невозможно удалить дизлайк отзыву, отзыва с id {} не найдено", reviewId);

@@ -77,7 +77,7 @@ public class FilmController {
     @GetMapping("/director/{directorId}")
     public Collection<Film> getFilmsDirectorBySort(@PathVariable Integer directorId
             , @RequestParam(value = "sortBy") String sort) throws SQLException {
-        if(sort.equals("likes")) {
+        if (sort.equals("likes")) {
             return filmService.getDirectorFilmSortedByLike(directorId);
         } else {
             return filmService.getDirectorFilmSortedByYear(directorId);

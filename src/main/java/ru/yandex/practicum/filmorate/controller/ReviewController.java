@@ -13,7 +13,7 @@ import java.util.Collection;
 @RestController
 @RequestMapping("/reviews")
 public class ReviewController {
-    ReviewService reviewService;
+    private ReviewService reviewService;
 
     @Autowired
     public ReviewController(ReviewService reviewService) {
