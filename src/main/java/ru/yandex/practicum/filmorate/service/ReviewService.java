@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.dao.FeedStorage;
 import ru.yandex.practicum.filmorate.dao.ReviewStorage;
 import ru.yandex.practicum.filmorate.dao.impl.FilmDbStorage;
 import ru.yandex.practicum.filmorate.dao.impl.ReviewDbStorage;
+import ru.yandex.practicum.filmorate.dao.impl.UserDbStorage;
 import ru.yandex.practicum.filmorate.enums.EventType;
 import ru.yandex.practicum.filmorate.enums.OperationType;
 import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
@@ -23,13 +24,14 @@ public class ReviewService implements ReviewStorage {
     private int id = 1;
     private final ReviewDbStorage reviewDbStorage;
     private final FilmDbStorage filmDbStorage;
-    private final UserService userService;
+    private final UserDbStorage userDbStorage;
     private final FeedStorage feedStorage;
 
     public ReviewService(@Qualifier("reviewDbStorage") ReviewDbStorage reviewDbStorage
-            , UserService userService, @Qualifier("FilmDbStorage") FilmDbStorage filmDbStorage, FeedStorage feedStorage) {
+            , @Qualifier("UserDbStorage") UserDbStorage userDbStorage, @Qualifier("FilmDbStorage") FilmDbStorage filmDbStorage
+            , FeedStorage feedStorage) {
         this.reviewDbStorage = reviewDbStorage;
-        this.userService = userService;
+        this.userDbStorage = userDbStorage;
         this.filmDbStorage = filmDbStorage;
         this.feedStorage = feedStorage;
     }
@@ -40,7 +42,7 @@ public class ReviewService implements ReviewStorage {
             log.warn("Отзыв не создан. Не указан тип отзыва");
             throw new RequestError(HttpStatus.BAD_REQUEST, "Не указан тип отзыва");
         }
-        if (!userService.checkOnContainsUser(review.getUserId())) {
+        if (userDbStorage.findUserById(review.getUserId()) == null) {
             log.warn("Отзыв не создан, пользователь с id {} не найден", review.getUserId());
             throw new EntityNotFoundException("Пользователь с таким id не найден");
         }
@@ -71,7 +73,7 @@ public class ReviewService implements ReviewStorage {
 
     @Override
     public Review updateReview(Review review) {
-        if (checkContainsReview(review.getReviewId())) {
+        if (reviewDbStorage.getReviewById(review.getReviewId()) == null) {
             log.warn("Отзыв не обновлен, отзыва с id {} не найдено", review.getReviewId());
             throw new EntityNotFoundException("Отзыв с таким id не найден");
         }
@@ -92,7 +94,7 @@ public class ReviewService implements ReviewStorage {
 
     @Override
     public void deleteReview(int reviewId) {
-        if (checkContainsReview(reviewId)) {
+        if (reviewDbStorage.getReviewById(reviewId) == null) {
             log.warn("Отзыв не удален, отзыва с id {} не найдено", reviewId);
             throw new EntityNotFoundException("Отзыв с таким id не найден");
         }
@@ -111,7 +113,8 @@ public class ReviewService implements ReviewStorage {
 
     @Override
     public Review getReviewById(int reviewId) {
-        if (checkContainsReview(reviewId)) {
+        Review review = reviewDbStorage.getReviewById(reviewId);
+        if (review == null) {
             log.warn("Не возможно отобразить отзыв, отзыва с id {} не найдено", reviewId);
             throw new EntityNotFoundException("Отзыв с таким id не найден");
         }
@@ -135,11 +138,11 @@ public class ReviewService implements ReviewStorage {
 
     @Override
     public void addLikeForReview(int reviewId, int userId) {
-        if (checkContainsReview(reviewId)) {
+        if (reviewDbStorage.getReviewById(reviewId) == null) {
             log.warn("Невозможно добавить лайк отзыву, отзыва с id {} не найдено", reviewId);
             throw new EntityNotFoundException("Отзыв с таким id не найден");
         }
-        if (!userService.checkOnContainsUser(userId)) {
+        if (userDbStorage.findUserById(userId) == null) {
             log.warn("Лайк не добавлен, пользователь с id {} не найден", userId);
             throw new EntityNotFoundException("Пользователь с таким id не найден");
         }
@@ -153,11 +156,11 @@ public class ReviewService implements ReviewStorage {
 
     @Override
     public void addDislikeForReview(int reviewId, int userId) {
-        if (checkContainsReview(reviewId)) {
+        if (reviewDbStorage.getReviewById(reviewId) == null) {
             log.warn("Невозможно добавить дизлайк отзыву, отзыва с id {} не найдено", reviewId);
             throw new EntityNotFoundException("Отзыв с таким id не найден");
         }
-        if (!userService.checkOnContainsUser(userId)) {
+        if (userDbStorage.findUserById(userId) == null) {
             log.warn("Невозможно добавить дизлайк, пользователь с id {} не найден", userId);
             throw new EntityNotFoundException("Пользователь с таким id не найден");
         }
@@ -171,11 +174,11 @@ public class ReviewService implements ReviewStorage {
 
     @Override
     public void deleteLikeForReview(int reviewId, int userId) {
-        if (checkContainsReview(reviewId)) {
+        if (reviewDbStorage.getReviewById(reviewId) == null) {
             log.warn("Невозможно удалить лайк отзыву, отзыва с id {} не найдено", reviewId);
             throw new EntityNotFoundException("Отзыв с таким id не найден");
         }
-        if (!userService.checkOnContainsUser(userId)) {
+        if (userDbStorage.findUserById(userId) == null) {
             log.warn("Лайк не удален, пользователь с id {} не найден", userId);
             throw new EntityNotFoundException("Пользователь с таким id не найден");
         }
@@ -189,11 +192,11 @@ public class ReviewService implements ReviewStorage {
 
     @Override
     public void deleteDislikeForReview(int reviewId, int userId) {
-        if (checkContainsReview(reviewId)) {
+        if (reviewDbStorage.getReviewById(reviewId) == null) {
             log.warn("Невозможно удалить дизлайк отзыву, отзыва с id {} не найдено", reviewId);
             throw new EntityNotFoundException("Отзыв с таким id не найден");
         }
-        if (!userService.checkOnContainsUser(userId)) {
+        if (userDbStorage.findUserById(userId) == null) {
             log.warn("Невозможно удалить дизлайк, пользователь с id {} не найден", userId);
             throw new EntityNotFoundException("Пользователь с таким id не найден");
         }
@@ -201,12 +204,5 @@ public class ReviewService implements ReviewStorage {
             log.warn("Дислайк не удален, пользователь с id {} не ставил лайк посту с id {}", userId, reviewId);
             throw new EntityNotFoundException("Пользователь уже добавил дислайк");
         }
-    }
-
-    private boolean checkContainsReview(int reviewId) {
-        for (Review review : reviewDbStorage.getAllReview()) {
-            if (review.getReviewId() == reviewId) return false;
-        }
-        return true;
     }
 }

@@ -56,7 +56,7 @@ public class UserService {
     }
 
     public User putUser(User user) {
-        if (checkOnContainsUser(user.getId())) {
+        if (userStorage.findUserById(user.getId()) != null) {
             if (user.getName() == null) {
                 user.setName(user.getLogin());
                 log.info("Пользователь не указал имени, присвоено значение логина - {}", user.getName());
@@ -75,9 +75,10 @@ public class UserService {
     }
 
     public User findUserById(int id) {
-        if (checkOnContainsUser(id)) {
+        User user = userStorage.findUserById(id);
+        if (user != null) {
             log.info("Получен GET запрос пользователя с id = {}", id);
-            return userStorage.findUserById(id);
+            return user;
         } else {
             log.warn("Получен GET запрос пользователя с несуществующим id - {}", id);
             throw new EntityNotFoundException("Ошибка. Пользователь с id = " + id + " не найден.");
@@ -85,16 +86,16 @@ public class UserService {
     }
 
     public void addFriend(int userId, int friendId) {
-        if (!checkOnContainsUser(userId)) {
+        if (userStorage.findUserById(userId) == null) {
             log.warn("Не удалось найти пользователя с id = {} ", userId);
-            throw new EntityNotFoundException("Ошибка при удалении пользователя из друзей - пользователь не найден");
+            throw new EntityNotFoundException("Ошибка при добавлении пользователя из друзей - пользователь не найден");
         }
-        if (!checkOnContainsUser(friendId)) {
+        if (userStorage.findUserById(friendId) == null) {
             log.warn("Не удалось найти пользователя с id = {} ", friendId);
-            throw new EntityNotFoundException("Ошибка при удалении пользователя из друзей - пользователь не найден");
+            throw new EntityNotFoundException("Ошибка при добавлении пользователя из друзей - пользователь не найден");
         }
 
-        if (containsUserInFriendList(userId, friendId)) {
+        if (!friendStorage.getFriendForUser(userId, friendId)) {
             log.warn("Не удалось добавить пользователя {} ", userStorage.findUserById(friendId).getName() +
                     " в друзья, так как он уже друг");
             throw new EntityNotFoundException("Ошибка при добавлении пользователя в друзья");
@@ -160,19 +161,5 @@ public class UserService {
         } else {
             throw new EntityNotFoundException("Юзер с id " + id + " не найден.");
         }
-    }
-
-    boolean checkOnContainsUser(int userId) {
-        for (User user : userStorage.getUsers()) {
-            if (user.getId() == userId) return true;
-        }
-        return false;
-    }
-
-    public boolean containsUserInFriendList(Integer userId, Integer friendId) {
-        for (User user : getFriends(userId)) {
-            if (user.getId().equals(friendId)) return true;
-        }
-        return false;
     }
 }

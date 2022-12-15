@@ -43,8 +43,12 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User findUserById(int id) {
-        return jdbcTemplate.queryForObject("SELECT * FROM USERS_MODEL WHERE USER_ID = ?"
+        List<User> userList = jdbcTemplate.query("SELECT * FROM USERS_MODEL WHERE USER_ID = ?"
                 , new UserMapper(), id);
+        if (userList.size() == 0) {
+            return null;
+        }
+        return userList.get(0);
     }
 
     // 1. Определить фильмы, которые один пролайкал, а другой нет.

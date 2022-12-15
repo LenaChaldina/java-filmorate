@@ -50,24 +50,17 @@ public class DirectorService implements DirectorStorage {
 
     @Override
     public Director getDirectorById(Integer id) {
-        if (checkContainsDirectorInList(id)) {
-            log.info("Получен запрос информации о режиссере {}", id);
-            return directorDbStorage.getDirectorById(id);
+        Director director = directorDbStorage.getDirectorById(id);
+        if(director == null) {
+            log.warn("Получен запрос на не существующего в списке режиссера");
+            throw new RequestError(HttpStatus.NOT_FOUND, "Режиссер не найден");
         }
-        log.warn("Получен запрос на не существующего в списке режиссера");
-        throw new RequestError(HttpStatus.NOT_FOUND, "Режиссер не найден");
+        return director;
     }
 
     @Override
     public void deleteDirectorById(Integer id) {
         log.info("Режиссер с id = {} удален из списка", id);
         directorDbStorage.deleteDirectorById(id);
-    }
-
-    private boolean checkContainsDirectorInList(Integer id) {
-        for (Director director : directorDbStorage.getAllDirectors()) {
-            if (Objects.equals(director.getId(), id) && director != null) return true;
-        }
-        return false;
     }
 }
